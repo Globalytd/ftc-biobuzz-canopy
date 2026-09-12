@@ -16,7 +16,7 @@ public class BasicTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
         hardware = new RobotHardware(hardwareMap);
-        drive = new DriveSubsystem();
+        drive = new DriveSubsystem(hardware);
         intake = new IntakeSubsystem();
 
         telemetry.addLine("GYTD scaffold initialized");
@@ -34,6 +34,7 @@ public class BasicTeleOp extends LinearOpMode {
             idle();
         }
 
+        drive.stop();
         hardware.shutdown();
     }
 }
