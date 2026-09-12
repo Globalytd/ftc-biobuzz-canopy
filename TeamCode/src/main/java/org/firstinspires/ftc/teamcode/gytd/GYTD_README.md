@@ -13,12 +13,11 @@ The FTC SDK wiring is intentionally left mostly stock so the project can be buil
 ```
 gytd/
 ├── autonomous/          - Autonomous period OpModes
-├── drive/              - Drive subsystem (motor control, movement logic)
 ├── hardware/           - Centralized hardware initialization and management
-├── intake/             - Intake subsystem
 ├── opmodes/            - OpMode organization (teleop, autonomous)
+├── subsystems/         - Drive, intake, and vision subsystems
 ├── test/               - Hardware testing and calibration OpModes
-└── vision/             - Vision processing and camera pipelines
+└── vision/             - Vision pipeline base types
 ```
 
 ---
@@ -41,11 +40,34 @@ gytd/
 
 ### Drive Subsystem
 
-**Purpose:** Robot drive and movement control.
+**Purpose:** Robot drive and movement control using a mecanum drivetrain.
 
-**Location:** `drive/DriveSubsystem.java`
+**Location:** `subsystems/DriveSubsystem.java`
 
-**Current State:** Barebones placeholder ready for motor initialization and movement logic.
+**Implemented:**
+- Robot-centric mecanum kinematics (`axial`, `lateral`, `yaw`)
+- Field-centric transform using IMU heading
+- Motor power normalization so wheel commands stay in `[-1.0, 1.0]`
+- Adjustable speed scaling for driver control
+
+**Why we use the Lynx module (bulk caching):**
+- REV Control/Expansion Hubs expose hardware through `LynxModule`.
+- Without bulk caching, each sensor/motor read can trigger separate bus transactions.
+- That increases loop latency and can make drive response feel inconsistent.
+- With `BulkCachingMode.AUTO`, the SDK manages cache refreshes automatically each loop cycle.
+- This keeps code simpler while still reducing transaction overhead and improving responsiveness.
+
+**Pattern used in OpModes:**
+```java
+drive.driveRobotCentric(axial, lateral, yaw);
+// or
+drive.driveFieldCentric(axial, lateral, yaw, headingRadians);
+```
+
+**Why AUTO instead of MANUAL right now:**
+- `AUTO` is easier to reason about while the codebase is still small.
+- It avoids forgetting explicit cache-clearing calls in new OpModes.
+- You can switch to `MANUAL` later if you need tighter loop profiling/control.
 
 ---
 
@@ -53,7 +75,7 @@ gytd/
 
 **Purpose:** Robot intake mechanism control.
 
-**Location:** `intake/IntakeSubsystem.java`
+**Location:** `subsystems/IntakeSubsystem.java`
 
 **Current State:** Barebones placeholder ready for motor/servo initialization and control logic.
 
@@ -66,6 +88,10 @@ gytd/
 **Files:**
 - `VisionSubsystem` - Main vision controller with enable/disable and pipeline management
 - `VisionPipeline` - Abstract base class for custom vision processing pipelines
+
+**Locations:**
+- `subsystems/VisionSubsystem.java`
+- `vision/VisionPipeline.java`
 
 **Usage:**
 ```java
@@ -90,7 +116,8 @@ All OpModes are organized into packages matching their game mode type and are re
 **Package:** `opmodes/teleop/`
 
 **Available OpModes:**
-- `MainTeleOp` - Primary driver-controlled operation mode with drive, intake, and vision integration
+- `RobotCentricTeleOp` - Robot-oriented mecanum drive
+- `FieldCentricTeleOp` - Field-oriented mecanum drive using IMU heading (`Y` resets yaw)
 
 **Purpose:** Driver-controlled robot operation during TeleOp period.
 

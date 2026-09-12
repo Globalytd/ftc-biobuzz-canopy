@@ -16,7 +16,7 @@ public class AutonomousBasic extends LinearOpMode {
     @Override
     public void runOpMode() {
         hardware = new RobotHardware(hardwareMap);
-        drive = new DriveSubsystem();
+        drive = new DriveSubsystem(hardware);
         intake = new IntakeSubsystem();
 
         telemetry.addLine("GYTD Autonomous initialized");
@@ -32,6 +32,7 @@ public class AutonomousBasic extends LinearOpMode {
             idle();
         }
 
+        drive.stop();
         hardware.shutdown();
     }
 }
