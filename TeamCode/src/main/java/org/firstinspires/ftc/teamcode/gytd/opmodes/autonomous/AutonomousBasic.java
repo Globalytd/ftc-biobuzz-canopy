@@ -1,14 +1,14 @@
-package org.firstinspires.ftc.teamcode.gytd;
+package org.firstinspires.ftc.teamcode.gytd.opmodes.autonomous;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.gytd.drive.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
-import org.firstinspires.ftc.teamcode.gytd.intake.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
 
-@TeleOp(name = "GYTD Barebones TeleOp", group = "GYTD")
-public class BasicTeleOp extends LinearOpMode {
+@Autonomous(name = "GYTD Auto Barebones", group = "GYTD")
+public class AutonomousBasic extends LinearOpMode {
     private RobotHardware hardware;
     private DriveSubsystem drive;
     private IntakeSubsystem intake;
@@ -19,17 +19,15 @@ public class BasicTeleOp extends LinearOpMode {
         drive = new DriveSubsystem();
         intake = new IntakeSubsystem();
 
-        telemetry.addLine("GYTD scaffold initialized");
+        telemetry.addLine("GYTD Autonomous initialized");
         telemetry.addData("Drive", drive.getStatus());
         telemetry.addData("Intake", intake.getStatus());
         telemetry.update();
 
         waitForStart();
 
-        while (opModeIsActive()) {
-            telemetry.addLine("Barebones project ready for incremental build-out");
-            telemetry.addData("Drive", drive.getStatus());
-            telemetry.addData("Intake", intake.getStatus());
+        if (opModeIsActive()) {
+            telemetry.addLine("Autonomous routine ready for implementation");
             telemetry.update();
             idle();
         }
