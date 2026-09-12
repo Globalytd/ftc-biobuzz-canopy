@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
 
-@TeleOp(name = "GYTD Barebones TeleOp", group = "GYTD")
+@TeleOp(name = "Barebones TeleOp", group = "TeleOp")
 public class BasicTeleOp extends LinearOpMode {
     private RobotHardware hardware;
     private DriveSubsystem drive;
@@ -19,7 +19,7 @@ public class BasicTeleOp extends LinearOpMode {
         drive = new DriveSubsystem(hardware);
         intake = new IntakeSubsystem();
 
-        telemetry.addLine("GYTD scaffold initialized");
+        telemetry.addLine("Barebones TeleOp scaffold initialized");
         telemetry.addData("Drive", drive.getStatus());
         telemetry.addData("Intake", intake.getStatus());
         telemetry.update();
