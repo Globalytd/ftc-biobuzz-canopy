@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
 
-@Autonomous(name = "GYTD Auto Barebones", group = "GYTD")
+@Autonomous(name = "Auto Basic", group = "AutoOp")
 public class AutonomousBasic extends LinearOpMode {
     private RobotHardware hardware;
     private DriveSubsystem drive;
@@ -19,7 +19,7 @@ public class AutonomousBasic extends LinearOpMode {
         drive = new DriveSubsystem(hardware);
         intake = new IntakeSubsystem();
 
-        telemetry.addLine("GYTD Autonomous initialized");
+        telemetry.addLine("Autonomous initialized");
         telemetry.addData("Drive", drive.getStatus());
         telemetry.addData("Intake", intake.getStatus());
         telemetry.update();

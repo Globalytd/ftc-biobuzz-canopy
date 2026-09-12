@@ -22,6 +22,7 @@ public class RobotHardware {
     private DcMotorEx frontRightDrive;
     private DcMotorEx backLeftDrive;
     private DcMotorEx backRightDrive;
+    private DcMotorEx intakeMotor;
     private IMU imu;
     private List<LynxModule> lynxModules;
 
@@ -46,6 +47,10 @@ public class RobotHardware {
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Initialize intake motor
+        intakeMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.INTAKE_MOTOR);
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         imu = hardwareMap.get(IMU.class, HardwareConstants.IMU_NAME);
         IMU.Parameters parameters = new IMU.Parameters(
@@ -81,6 +86,10 @@ public class RobotHardware {
         return backRightDrive;
     }
 
+    public DcMotorEx getIntakeMotor() {
+        return intakeMotor;
+    }
+
     public double getHeadingRadians() {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
@@ -91,7 +100,7 @@ public class RobotHardware {
 
     public void clearBulkCache() {
         for (LynxModule module : lynxModules) {
-            if (module.getBulkCachingMode() == LynxModule.BulkCachingMode.MANUAL) {
+            if (module.getBulkCachingMode() == LynxModule.BulkCachingMode.AUTO) {
                 module.clearBulkCache();
             }
         }
@@ -102,6 +111,7 @@ public class RobotHardware {
         frontRightDrive.setPower(0.0);
         backLeftDrive.setPower(0.0);
         backRightDrive.setPower(0.0);
+        intakeMotor.setPower(0.0);
     }
 }
 

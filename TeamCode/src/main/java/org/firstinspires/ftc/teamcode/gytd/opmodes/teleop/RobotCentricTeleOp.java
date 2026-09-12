@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.VisionSubsystem;
 
-@TeleOp(name = "GYTD Robot-Centric TeleOp", group = "GYTD")
+@TeleOp(name = "Robot-Centric TeleOp", group = "TeleOp")
 public class RobotCentricTeleOp extends LinearOpMode {
     private RobotHardware hardware;
     private DriveSubsystem drive;
@@ -22,7 +22,7 @@ public class RobotCentricTeleOp extends LinearOpMode {
         intake = new IntakeSubsystem();
         vision = new VisionSubsystem(hardwareMap);
 
-        telemetry.addLine("GYTD TeleOp initialized");
+        telemetry.addLine("Robot-Centric TeleOp initialized");
         telemetry.addData("Drive", drive.getStatus());
         telemetry.addData("Intake", intake.getStatus());
         telemetry.addData("Vision", vision.getStatus());
