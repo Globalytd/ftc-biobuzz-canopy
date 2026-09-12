@@ -4,15 +4,18 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gytd.drive.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
 import org.firstinspires.ftc.teamcode.gytd.intake.IntakeSubsystem;
 
 @TeleOp(name = "GYTD Barebones TeleOp", group = "GYTD")
-public class GytdBarebonesTeleOp extends LinearOpMode {
+public class BasicTeleOp extends LinearOpMode {
+    private RobotHardware hardware;
     private DriveSubsystem drive;
     private IntakeSubsystem intake;
 
     @Override
     public void runOpMode() {
+        hardware = new RobotHardware(hardwareMap);
         drive = new DriveSubsystem();
         intake = new IntakeSubsystem();
 
@@ -30,6 +33,8 @@ public class GytdBarebonesTeleOp extends LinearOpMode {
             telemetry.update();
             idle();
         }
+
+        hardware.shutdown();
     }
 }
 
