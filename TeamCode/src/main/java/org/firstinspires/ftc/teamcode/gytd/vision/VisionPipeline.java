@@ -6,6 +6,8 @@ import org.opencv.core.Scalar;
 /**
  * Base class for vision processing pipelines.
  * Extend this class to implement custom vision processing logic.
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
  */
 public abstract class VisionPipeline {
     protected Mat input;

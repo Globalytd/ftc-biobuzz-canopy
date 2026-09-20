@@ -3,21 +3,26 @@ package org.firstinspires.ftc.teamcode.gytd.opmodes.teleop;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
-import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
+
+/**
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
+ */
 
 @TeleOp(name = "Barebones TeleOp", group = "TeleOp")
 public class BasicTeleOp extends LinearOpMode {
-    private RobotHardware hardware;
+    private Robot robot;
     private DriveSubsystem drive;
     private IntakeSubsystem intake;
 
     @Override
     public void runOpMode() {
-        hardware = new RobotHardware(hardwareMap);
-        drive = new DriveSubsystem(hardware);
-        intake = new IntakeSubsystem();
+        robot = new Robot(hardwareMap);
+        drive = robot.getDrive();
+        intake = robot.getIntake();
 
         telemetry.addLine("Barebones TeleOp scaffold initialized");
         telemetry.addData("Drive", drive.getStatus());
@@ -34,8 +39,6 @@ public class BasicTeleOp extends LinearOpMode {
             idle();
         }
 
-        drive.stop();
-        hardware.shutdown();
+        robot.shutdown();
     }
 }
-

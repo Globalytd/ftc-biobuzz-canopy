@@ -165,6 +165,14 @@ All OpModes are organized into packages matching their game mode type and are re
 5. Implement your operation logic
 6. Call `shutdown()` on all subsystems before exiting
 
+### Author and Commit Automation
+
+To automatically add class author tags for new Java classes and configure local commit identity, follow:
+- `doc/COMMIT_AND_AUTHOR_AUTOMATION.md`
+
+This keeps `@author` tags for `Daniel Musigire` and `Katriel Nakiberu` consistent in new `TeamCode` classes.
+For files in `gytd/test/`, commits are also checked to make sure test behavior changes are accompanied by matching class Javadoc updates.
+
 ### Testing
 
 - Use `HardwareTest` OpMode for initial hardware validation

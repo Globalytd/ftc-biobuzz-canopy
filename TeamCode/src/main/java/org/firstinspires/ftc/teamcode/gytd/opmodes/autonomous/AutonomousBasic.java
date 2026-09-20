@@ -3,21 +3,26 @@ package org.firstinspires.ftc.teamcode.gytd.opmodes.autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
-import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
+
+/**
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
+ */
 
 @Autonomous(name = "Auto Basic", group = "AutoOp")
 public class AutonomousBasic extends LinearOpMode {
-    private RobotHardware hardware;
+    private Robot robot;
     private DriveSubsystem drive;
     private IntakeSubsystem intake;
 
     @Override
     public void runOpMode() {
-        hardware = new RobotHardware(hardwareMap);
-        drive = new DriveSubsystem(hardware);
-        intake = new IntakeSubsystem();
+        robot = new Robot(hardwareMap);
+        drive = robot.getDrive();
+        intake = robot.getIntake();
 
         telemetry.addLine("Autonomous initialized");
         telemetry.addData("Drive", drive.getStatus());
@@ -32,8 +37,6 @@ public class AutonomousBasic extends LinearOpMode {
             idle();
         }
 
-        drive.stop();
-        hardware.shutdown();
+        robot.shutdown();
     }
 }
-

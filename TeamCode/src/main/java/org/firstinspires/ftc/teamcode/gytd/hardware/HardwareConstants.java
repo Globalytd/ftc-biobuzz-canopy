@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.gytd.hardware;
 /**
  * Hardware device names and configuration constants.
  * Update these to match your robot's hardware configuration.
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
  */
 public class HardwareConstants {
     // Drive motor names

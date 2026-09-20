@@ -15,6 +15,8 @@ import java.util.List;
 /**
  * Central hardware container for the GYTD robot.
  * Holds references to all hardware devices and manages their lifecycle.
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
  */
 public class RobotHardware {
     private final HardwareMap hardwareMap;
@@ -38,10 +40,10 @@ public class RobotHardware {
         backRightDrive = hardwareMap.get(DcMotorEx.class, HardwareConstants.BACK_RIGHT_DRIVE);
 
         // Positive axial input should move the robot forward.
-        frontLeftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeftDrive.setDirection(DcMotorSimple.Direction.FORWARD);
         frontRightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        backRightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
