@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode.gytd.subsystems;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
+/**
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
+ */
 
 public class DriveSubsystem {
     private final RobotHardware hardware;

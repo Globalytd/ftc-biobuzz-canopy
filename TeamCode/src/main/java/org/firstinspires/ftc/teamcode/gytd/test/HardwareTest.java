@@ -5,6 +5,33 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
 
+/**
+ * Step-by-step hardware smoke test for drive motors, intake motor, and IMU yaw.
+ * Use this first when wiring changes are made or when the robot behavior is unknown.
+ *
+ * Configuration required on the Control Hub Robot Configuration:
+ * - Drive motors named front_left_drive, front_right_drive, back_left_drive, back_right_drive
+ * - Intake motor named intake_motor
+ * - IMU named imu
+ *
+ * Controls:
+ * - gamepad1 dpad_up: move to next test stage
+ * - gamepad1 dpad_down: move to previous test stage
+ *
+ * Stage behavior:
+ * - stages 1-4 spin one drive motor at a time at low power (0.3)
+ * - stage 5 spins all drive motors together at low power
+ * - stage 6 spins intake motor at low power
+ * - stages 0 and 7 stop all motors
+ *
+ * Safety notes:
+ * - Put robot on blocks before stage 5 (all-drive test)
+ * - Keep wheels clear of wires/hands during stage changes
+ * - Return to stage 0 or 7 before stopping the OpMode
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
+ */
+
 @TeleOp(name = "Test: Hardware", group = "Test")
 public class HardwareTest extends LinearOpMode {
     private RobotHardware hardware;

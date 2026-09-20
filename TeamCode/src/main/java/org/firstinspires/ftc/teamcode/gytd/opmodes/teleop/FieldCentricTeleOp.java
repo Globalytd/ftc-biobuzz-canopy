@@ -4,12 +4,19 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
+import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.VisionSubsystem;
 
+/**
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
+ */
+
 @TeleOp(name = "Field-Centric TeleOp", group = "TeleOp")
 public class FieldCentricTeleOp extends LinearOpMode {
+    private Robot robot;
     private RobotHardware hardware;
     private DriveSubsystem drive;
     private IntakeSubsystem intake;
@@ -17,10 +24,11 @@ public class FieldCentricTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        hardware = new RobotHardware(hardwareMap);
-        drive = new DriveSubsystem(hardware);
-        intake = new IntakeSubsystem();
-        vision = new VisionSubsystem(hardwareMap);
+        robot = new Robot(hardwareMap);
+        hardware = robot.getHardware();
+        drive = robot.getDrive();
+        intake = robot.getIntake();
+        vision = robot.getVision();
 
         telemetry.addLine("Field-Centric initialized");
         telemetry.addLine("Press Y to reset heading");
@@ -61,9 +69,6 @@ public class FieldCentricTeleOp extends LinearOpMode {
             idle();
         }
 
-        drive.stop();
-        vision.shutdown();
-        hardware.shutdown();
+        robot.shutdown();
     }
 }
-
