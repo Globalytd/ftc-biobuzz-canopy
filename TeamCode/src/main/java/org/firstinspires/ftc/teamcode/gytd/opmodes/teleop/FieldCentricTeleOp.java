@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
+import org.firstinspires.ftc.teamcode.gytd.pathing.PathingConfig;
 import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
@@ -24,6 +25,19 @@ public class FieldCentricTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        while (!isStarted() && !isStopRequested()) {
+            PathingConfig.applyDriverStationSelection(gamepad1);
+            telemetry.addLine("Select drive mode before Start");
+            telemetry.addLine(PathingConfig.getSelectionInstructions());
+            telemetry.addData("Selected", PathingConfig.getActiveBackendName());
+            telemetry.update();
+            idle();
+        }
+
+        if (isStopRequested()) {
+            return;
+        }
+
         robot = new Robot(hardwareMap);
         hardware = robot.getHardware();
         drive = robot.getDrive();
@@ -32,6 +46,7 @@ public class FieldCentricTeleOp extends LinearOpMode {
 
         telemetry.addLine("Field-Centric initialized");
         telemetry.addLine("Press Y to reset heading");
+        telemetry.addData("Drive Backend", drive.getBackendName());
         telemetry.update();
 
         waitForStart();
@@ -59,9 +74,10 @@ public class FieldCentricTeleOp extends LinearOpMode {
             drive.driveFieldCentric(axial, lateral, yaw, heading);
 
             telemetry.addLine("Field-centric drive active");
+            telemetry.addData("Drive Backend", drive.getBackendName());
             telemetry.addData("Heading (rad)", heading);
             telemetry.addData("Drive", drive.getStatus());
-            telemetry.addData("Scale", drive.getSpeedScale());
+            telemetry.addData("SpeedScale", drive.getSpeedScale());
             telemetry.addData("MotorPowers", drive.getMotorPowers());
             telemetry.addData("Intake", intake.getStatus());
             telemetry.addData("Vision", vision.getStatus());

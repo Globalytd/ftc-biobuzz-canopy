@@ -25,6 +25,7 @@ public class RobotHardware {
     private DcMotorEx backLeftDrive;
     private DcMotorEx backRightDrive;
     private DcMotorEx intakeMotor;
+    private DcMotorEx launchMotor;
     private IMU imu;
     private List<LynxModule> lynxModules;
 
@@ -52,7 +53,14 @@ public class RobotHardware {
 
         // Initialize intake motor
         intakeMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.INTAKE_MOTOR);
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        //TODO: finish this and intitalize each subsystem correctly.
+        // Initialize intake motor
+        launchMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.INTAKE_MOTOR);
+        launchMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         imu = hardwareMap.get(IMU.class, HardwareConstants.IMU_NAME);
         IMU.Parameters parameters = new IMU.Parameters(

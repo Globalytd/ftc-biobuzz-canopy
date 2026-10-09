@@ -15,6 +15,7 @@ public class HardwareConstants {
 
     // Intake device names (placeholders)
     public static final String INTAKE_MOTOR = "intake_motor";
+    public static final String LAUNCH_MOTOR = "launch_motor";
 
     // Control Hub IMU name in Robot Configuration
     public static final String IMU_NAME = "imu";
