@@ -31,12 +31,12 @@ public class Robot {
         // Drive + intake are connected to hardware that already exists.
         this.drive = new DriveSubsystem(hardware);
         this.intake = new IntakeSubsystem(hardware.getIntakeMotor());
+        this.vision = new VisionSubsystem(hardwareMap);
 
         // These are safe placeholders until final hardware names are provided.
         this.magazine = new MagazineSubsystem();
         this.shooter = new ShooterSubsystem();
         this.flower = new FlowerSubsystem();
-        this.vision = new VisionSubsystem(hardwareMap);
     }
 
     public RobotHardware getHardware() {

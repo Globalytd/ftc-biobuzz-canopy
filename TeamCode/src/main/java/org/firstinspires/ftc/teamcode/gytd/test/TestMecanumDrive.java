@@ -4,18 +4,21 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
+import org.firstinspires.ftc.teamcode.gytd.pathing.PathingConfig;
 import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 
 /**
  * Verifies robot-centric mecanum drive mapping and IMU heading reset behavior.
  * Use this test to confirm wheel direction, strafing, turning, and speed scaling.
+ * Also verifies pre-start backend selection telemetry for legacy vs Pedro seam.
  *
  * Configuration required on the Control Hub Robot Configuration:
  * - Drive motors named front_left_drive, front_right_drive, back_left_drive, back_right_drive
  * - IMU named imu
  *
  * Controls:
+ * - pre-start: gamepad1 x selects Legacy Drive, gamepad1 b selects Pedro Pathing
  * - gamepad1 left stick: translation (forward/back and strafe)
  * - gamepad1 right stick x: rotate (yaw)
  * - gamepad1 left bumper: slow mode (speed scale 0.45)
@@ -33,12 +36,27 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 public class TestMecanumDrive extends LinearOpMode {
     @Override
     public void runOpMode() {
+        while (!isStarted() && !isStopRequested()) {
+            PathingConfig.applyDriverStationSelection(gamepad1);
+            telemetry.addLine("Select drive mode before Start");
+            telemetry.addLine(PathingConfig.getSelectionInstructions());
+            telemetry.addData("Selected", PathingConfig.getActiveBackendName());
+            telemetry.update();
+            idle();
+        }
+
+        if (isStopRequested()) {
+            return;
+        }
+
         Robot robot = new Robot(hardwareMap);
         DriveSubsystem drive = robot.getDrive();
         RobotHardware hardware = robot.getHardware();
 
         telemetry.addLine("Mecanum test ready");
         telemetry.addLine("Y: reset heading, bumpers: speed scale");
+        telemetry.addData("Selected", PathingConfig.getActiveBackendName());
+        telemetry.addData("Drive Backend", drive.getBackendName());
         telemetry.update();
 
         waitForStart();
@@ -65,6 +83,7 @@ public class TestMecanumDrive extends LinearOpMode {
 
             drive.driveRobotCentric(axial, lateral, yaw);
 
+            telemetry.addData("Drive Backend", drive.getBackendName());
             telemetry.addData("Heading (rad)", hardware.getHeadingRadians());
             telemetry.addData("Speed Scale", drive.getSpeedScale());
             telemetry.addData("Motor Powers", drive.getMotorPowers());
