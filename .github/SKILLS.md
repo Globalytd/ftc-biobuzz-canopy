@@ -178,5 +178,57 @@ git merge --no-ff v12.0 -m "Merge official FTC SDK v12.0"
 
 ---
 
-**Last Updated:** September 2026
+## Test OpMode Javadoc (pre-commit compliance)
+
+### Skill: Always write test-OpMode Javadocs that satisfy the pre-commit hook before committing.
+
+**Why:** `.githooks/pre-commit.ps1` blocks any commit touching
+`TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/test/**` if the class Javadoc is
+missing required sections, or if the file's code changed without the Javadoc also changing. This
+has previously caused rejected commits that needed a second pass.
+
+**Hook requirements (exact, case-sensitive substrings) for every file under `gytd/test/**`:**
+1. Javadoc contains `Configuration required`
+2. Javadoc contains `Controls:`
+3. Javadoc contains `Safety notes:`
+4. If the file's code changed in the commit, the Javadoc block must also have a diff line
+   (a pure code change with zero Javadoc edits fails the hook)
+5. Javadoc contains both `@author Daniel Musigire` and `@author Katriel Nakiberu`
+   (the hook auto-inserts these if missing, but write them yourself to avoid the extra pass)
+
+**Required template for every test OpMode class Javadoc:**
+```java
+/**
+ * <One or two sentence summary of what this test OpMode does.>
+ *
+ * Configuration required on the Control Hub Robot Configuration:
+ * - <hardware device name 1>
+ * - <hardware device name 2>
+ * (Use "None. This OpMode does not use any hardware devices." if truly hardware-free.)
+ *
+ * Controls:
+ * - <button/stick>: <what it does>
+ * - <button/stick>: <what it does>
+ *
+ * Safety notes:
+ * - Put the robot on blocks for the first run.
+ * - Keep the area around the robot clear while it is moving.
+ * - State how to immediately stop/cancel if motion is unexpected.
+ * @author Daniel Musigire
+ * @author Katriel Nakiberu
+ */
+```
+
+**Rules to follow automatically, every time:**
+- When creating a new file under `gytd/test/**`, write the full Javadoc above (filled in) as
+  part of the same change — don't wait for the pre-commit hook to flag it.
+- When editing behavior of an existing test OpMode (new buttons, new poses, new constants,
+  renamed hardware, etc.), also edit the Javadoc in the same change (update the `Controls:`
+  list, add a note under the summary, etc.) so the hook's "Javadoc changed" check passes.
+- Never remove the `Configuration required`, `Controls:`, or `Safety notes:` markers once added.
+- Before finishing any task that touches `gytd/test/**`, re-check the file against these rules.
+
+---
+
+**Last Updated:** November 2026
 
