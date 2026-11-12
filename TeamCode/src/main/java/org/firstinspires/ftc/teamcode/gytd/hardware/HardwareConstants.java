@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.gytd.hardware;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+
 /**
  * Hardware device names and configuration constants.
  * Update these to match your robot's hardware configuration.
@@ -20,8 +22,15 @@ public class HardwareConstants {
     // Control Hub IMU name in Robot Configuration
     public static final String IMU_NAME = "imu";
 
+    // Shared Control Hub orientation on robot (single source of truth across the project).
+    public static final RevHubOrientationOnRobot.LogoFacingDirection IMU_LOGO_FACING_DIRECTION =
+            RevHubOrientationOnRobot.LogoFacingDirection.UP;
+    public static final RevHubOrientationOnRobot.UsbFacingDirection IMU_USB_FACING_DIRECTION =
+            RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+    public static final RevHubOrientationOnRobot IMU_ORIENTATION_ON_ROBOT =
+            new RevHubOrientationOnRobot(IMU_LOGO_FACING_DIRECTION, IMU_USB_FACING_DIRECTION);
+
     private HardwareConstants() {
         // Utility class - no instantiation
     }
 }
-

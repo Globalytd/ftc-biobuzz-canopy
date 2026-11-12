@@ -5,13 +5,19 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 /**
- * Controls the shooter wheel speed.
+ * Controls the launcher wheel speed (formerly "shooter").
  * This uses target velocity (speed) instead of only raw motor power.
+ *
+ * IMPORTANT: {@link #DEFAULT_TARGET_VELOCITY} starts at 0.0 on purpose - a brand new
+ * LauncherSubsystem will not spin until something calls {@link #setTargetVelocity(double)} with a
+ * real, non-zero value. See {@code LauncherConstants.DEFAULT_TARGET_VELOCITY_RAD_PER_SEC} for the
+ * value TeleOps should apply at init time, and {@code Test: Launcher} for tuning it on the robot.
+ *
  * @author Daniel Musigire
  * @author Katriel Nakiberu
  */
-public class ShooterSubsystem {
-    public enum ShooterState {
+public class LauncherSubsystem {
+    public enum LauncherState {
         OFF,
         SPINNING_UP,
         READY,
@@ -22,24 +28,24 @@ public class ShooterSubsystem {
     private static final double DEFAULT_TARGET_VELOCITY = 0.0;
     private static final double DEFAULT_VELOCITY_TOLERANCE = 50.0;
 
-    private final DcMotorEx shooterMotor;
-    private ShooterState state = ShooterState.OFF;
+    private final DcMotorEx launcherMotor;
+    private LauncherState state = LauncherState.OFF;
     private double targetVelocity = DEFAULT_TARGET_VELOCITY;
     private double velocityTolerance = DEFAULT_VELOCITY_TOLERANCE;
 
-    public ShooterSubsystem() {
+    public LauncherSubsystem() {
         this(null);
     }
 
-    public ShooterSubsystem(DcMotorEx shooterMotor) {
-        this.shooterMotor = shooterMotor;
+    public LauncherSubsystem(DcMotorEx launcherMotor) {
+        this.launcherMotor = launcherMotor;
     }
 
     public void setTargetVelocity(double ticksPerSecond) {
         targetVelocity = Math.max(0.0, ticksPerSecond);
 
-        // If shooter is already running, apply new speed right away.
-        if (state != ShooterState.OFF) {
+        // If launcher is already running, apply new speed right away.
+        if (state != LauncherState.OFF) {
             applyVelocityTarget();
         }
     }
@@ -48,24 +54,24 @@ public class ShooterSubsystem {
         velocityTolerance = Math.max(0.0, toleranceTicksPerSecond);
     }
 
-    public void startShooter() {
-        state = ShooterState.SPINNING_UP;
+    public void startLauncher() {
+        state = LauncherState.SPINNING_UP;
         applyVelocityTarget();
         updateState();
     }
 
-    public void stopShooter() {
-        state = ShooterState.OFF;
-        if (shooterMotor != null) {
-            shooterMotor.setPower(0.0);
+    public void stopLauncher() {
+        state = LauncherState.OFF;
+        if (launcherMotor != null) {
+            launcherMotor.setPower(0.0);
         }
     }
 
     public double getVelocity() {
-        if (shooterMotor == null) {
+        if (launcherMotor == null) {
             return 0.0;
         }
-        return shooterMotor.getVelocity(AngleUnit.RADIANS);
+        return launcherMotor.getVelocity(AngleUnit.RADIANS);
     }
 
     public boolean atTargetVelocity() {
@@ -74,17 +80,17 @@ public class ShooterSubsystem {
     }
 
     public void markFiring() {
-        state = ShooterState.FIRING;
+        state = LauncherState.FIRING;
     }
 
     public void updateState() {
-        if (state == ShooterState.OFF || state == ShooterState.FIRING) {
+        if (state == LauncherState.OFF || state == LauncherState.FIRING) {
             return;
         }
-        state = atTargetVelocity() ? ShooterState.READY : ShooterState.SPINNING_UP;
+        state = atTargetVelocity() ? LauncherState.READY : LauncherState.SPINNING_UP;
     }
 
-    public ShooterState getState() {
+    public LauncherState getState() {
         return state;
     }
 
@@ -97,7 +103,7 @@ public class ShooterSubsystem {
     }
 
     public boolean isConfigured() {
-        return shooterMotor != null;
+        return launcherMotor != null;
     }
 
     public String getStatus() {
@@ -105,8 +111,10 @@ public class ShooterSubsystem {
     }
 
     private void applyVelocityTarget() {
-        if (shooterMotor != null) {
-            shooterMotor.setVelocity(targetVelocity, AngleUnit.RADIANS);
+        if (launcherMotor != null) {
+            launcherMotor.setVelocity(targetVelocity, AngleUnit.RADIANS);
         }
     }
 }
+
+

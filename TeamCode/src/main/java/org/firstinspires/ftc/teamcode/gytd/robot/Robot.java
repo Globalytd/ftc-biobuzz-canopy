@@ -6,13 +6,18 @@ import org.firstinspires.ftc.teamcode.gytd.hardware.RobotHardware;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.FlowerSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.gytd.subsystems.MagazineSubsystem;
-import org.firstinspires.ftc.teamcode.gytd.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.gytd.subsystems.LauncherSubsystem;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.VisionSubsystem;
 
 /**
  * Think of this class like the robot's "main control box".
  * OpModes ask this class for subsystems instead of creating everything themselves.
+ *
+ * NOTE (2026-11-08): the magazine/indexer subsystem was removed. The team is using a passive
+ * gravity-fed chute from intake straight to the launcher wheel instead of a powered indexer motor,
+ * so there is no "load"/"feed one"/"reverse magazine" step anymore - game pieces simply roll down
+ * to the launcher wheel on their own once the intake has pulled them in.
+ *
  * @author Daniel Musigire
  * @author Katriel Nakiberu
  */
@@ -20,8 +25,7 @@ public class Robot {
     private final RobotHardware hardware;
     private final DriveSubsystem drive;
     private final IntakeSubsystem intake;
-    private final MagazineSubsystem magazine;
-    private final ShooterSubsystem shooter;
+    private final LauncherSubsystem launcher;
     private final FlowerSubsystem flower;
     private final VisionSubsystem vision;
 
@@ -34,8 +38,7 @@ public class Robot {
         this.vision = new VisionSubsystem(hardwareMap);
 
         // These are safe placeholders until final hardware names are provided.
-        this.magazine = new MagazineSubsystem();
-        this.shooter = new ShooterSubsystem();
+        this.launcher = new LauncherSubsystem(hardware.getLaunchMotor());
         this.flower = new FlowerSubsystem();
     }
 
@@ -51,12 +54,8 @@ public class Robot {
         return intake;
     }
 
-    public MagazineSubsystem getMagazine() {
-        return magazine;
-    }
-
-    public ShooterSubsystem getShooter() {
-        return shooter;
+    public LauncherSubsystem getLauncher() {
+        return launcher;
     }
 
     public FlowerSubsystem getFlower() {
@@ -71,8 +70,7 @@ public class Robot {
         // Emergency-safe stop for every mechanism in one call.
         drive.stop();
         intake.stop();
-        magazine.stop();
-        shooter.stopShooter();
+        launcher.stopLauncher();
         flower.stop();
     }
 

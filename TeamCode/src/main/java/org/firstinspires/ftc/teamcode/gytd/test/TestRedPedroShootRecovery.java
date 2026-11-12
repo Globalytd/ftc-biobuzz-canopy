@@ -1,29 +1,14 @@
 package org.firstinspires.ftc.teamcode.gytd.test;
 import static com.pedropathing.api.Paths.line;
 
-import com.pedropathing.algorithm.Foresight;
-import com.pedropathing.algorithm.ForesightConfig;
-import com.pedropathing.controllers.Controller;
-import com.pedropathing.drivetrain.Drivetrain;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.localization.Localizer;
-import com.pedropathing.math.Matrix;
 import com.pedropathing.math.Pose;
-import com.pedropathing.math.Vector2D;
 import com.pedropathing.paths.Path;
-import com.pedropathing.revhub.drivetrains.Mecanum;
-import com.pedropathing.revhub.drivetrains.MecanumConfig;
-import com.pedropathing.revhub.localizers.Encoder;
-import com.pedropathing.revhub.localizers.RevHubIMU;
-import com.pedropathing.revhub.localizers.TwoWheelConfig;
-import com.pedropathing.revhub.localizers.TwoWheelLocalizer;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.gytd.hardware.HardwareConstants;
-import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.TeleOpConstants;
+import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.util.TeleOpConstants;
+import org.firstinspires.ftc.teamcode.gytd.pathing.PedroFollowerFactory;
 import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 
@@ -50,6 +35,9 @@ import java.util.List;
  * Safety notes:
  * - Put the robot on blocks for the first run.
  * - If the test uses a simulated nudge, the robot is not physically moved; only the pose estimate is shifted.
+ *
+ * Note: follower creation now goes through PedroFollowerFactory so this recovery test stays in
+ * sync with the shared two-wheel localizer/drivetrain configuration used by other Pedro OpModes.
  * @author Daniel Musigire
  * @author Katriel Nakiberu
  */
@@ -268,52 +256,7 @@ public class TestRedPedroShootRecovery extends LinearOpMode {
     }
 
     private Follower createFollower() {
-        MecanumConfig drivetrainConfig = new MecanumConfig(c -> {
-            c.frontLeftName.set(HardwareConstants.FRONT_LEFT_DRIVE);
-            c.frontRightName.set(HardwareConstants.FRONT_RIGHT_DRIVE);
-            c.backLeftName.set(HardwareConstants.BACK_LEFT_DRIVE);
-            c.backRightName.set(HardwareConstants.BACK_RIGHT_DRIVE);
-            c.frontLeftDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.frontRightDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.backLeftDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.backRightDirection.set(DcMotorSimple.Direction.REVERSE);
-            c.manualBrakeMode.set(true);
-        });
-
-        TwoWheelConfig localizerConfig = new TwoWheelConfig(c -> {
-            c.xPodName.set(HardwareConstants.FRONT_LEFT_DRIVE);
-            c.yPodName.set(HardwareConstants.FRONT_RIGHT_DRIVE);
-            c.imuName.set(HardwareConstants.IMU_NAME);
-            c.imu.set(new RevHubIMU(new RevHubOrientationOnRobot(
-                    RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                    RevHubOrientationOnRobot.UsbFacingDirection.LEFT)));
-            c.xPodOffset.set(0.0);
-            c.yPodOffset.set(0.0);
-            c.forwardTicksToInches.set(0.0100);
-            c.strafeTicksToInches.set(0.0100);
-            c.xPodDirection.set(Encoder.FORWARD);
-            c.yPodDirection.set(Encoder.FORWARD);
-        });
-
-        Localizer localizer = new TwoWheelLocalizer(hardwareMap, localizerConfig);
-        Drivetrain drivetrain = new Mecanum(hardwareMap, drivetrainConfig);
-
-        ForesightConfig algorithmConfig = new ForesightConfig(c -> {
-            c.forwardTranslational.set(Controller.piecewise(Controller.proportional(0.04)).put(2.5, Controller.proportional(0.08)));
-            c.strafeTranslational.set(Controller.piecewise(Controller.proportional(0.04)).put(2.5, Controller.proportional(0.08)));
-            c.coast.set(Controller.proportionalFeedforward(0.0));
-            c.brake.set(Controller.proportionalFeedforward(0.0));
-            c.headingFeedback.set(Controller.proportional(0.015));
-            c.headingBrakeCoefficients.set(Vector2D.cartesian(0.0, 0.0));
-            c.linearBrakeCoefficients.set(Matrix.diag(0.0, 0.0));
-            c.quadraticBrakeCoefficients.set(Matrix.diag(0.0, 0.0));
-            c.maxAchievableForwardVelocity.set(18.0);
-            c.maxAchievableStrafeVelocity.set(18.0);
-            c.naturalForwardDeceleration.set(18.0);
-            c.naturalStrafeDeceleration.set(18.0);
-        });
-
-        return new Follower(localizer, drivetrain, new Foresight(algorithmConfig));
+        return PedroFollowerFactory.createTwoWheelFollower(hardwareMap);
     }
 }
 
