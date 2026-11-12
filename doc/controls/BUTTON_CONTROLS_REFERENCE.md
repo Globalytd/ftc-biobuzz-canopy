@@ -9,7 +9,9 @@ Rule:
 
 Scope:
 - Button, bumper, dpad, and stick-button controls only.
-- Stick movement values are not listed here.
+- Stick movement values are not listed here, EXCEPT where a stick is used as a non-drive mechanism
+  trigger (push-forward/push-back to run a mechanism) instead of a drive input - those are
+  functionally buttons with a deadzone, not drive controls, so they are documented below.
 
 Note:
 - Duplicate button labels are okay when the context is different.
@@ -52,24 +54,33 @@ Note:
 | `A` | `Test: Intake` | Intake forward | Pull game piece in |
 | `B` | `Test: Intake` | Reverse intake | Push game piece out |
 | `X` | `Test: Intake` | Stop intake | Safe stop |
-| `A` | `Test: Magazine` | Load | Placeholder count increases |
-| `B` | `Test: Magazine` | Feed one | Placeholder count decreases |
-| `Y` | `Test: Magazine` | Reverse | Run magazine backward |
-| `X` | `Test: Magazine` | Stop | Safe stop |
-| `A` | `Test: Shooter` | Start shooter | Spin up to target velocity |
-| `B` | `Test: Shooter` | Stop shooter | Safe stop |
-| D-pad up | `Test: Shooter` | Increase target velocity | Step up tuning |
-| D-pad down | `Test: Shooter` | Decrease target velocity | Step down tuning |
 | `A` | `Test: Flower` | Deploy | Move flower out |
 | `B` | `Test: Flower` | Score | Use scoring position |
 | `X` | `Test: Flower` | Retract | Stow flower |
+| `A` | `Test: Launcher` | Start launcher | Spin up to target velocity (formerly `Test: Shooter`) |
+| `B` | `Test: Launcher` | Stop launcher | Safe stop |
+| D-pad up | `Test: Launcher` | Increase target velocity | Step up tuning |
+| D-pad down | `Test: Launcher` | Decrease target velocity | Step down tuning |
+
+Note: `Test: Magazine` was removed 2026-11-08. The team switched to a passive gravity-fed chute
+(intake -> launcher directly), so there is no indexer/magazine motor or test OpMode anymore.
 
 ---
 
 ## Gamepad 2
 
 Current status:
-- No gamepad 2 button controls are assigned yet.
+- `RED team Pedro`, `RED team Pedro Linear motion`:
+  - Left stick pushed forward (hold, past 0.2 deadzone) = intake forward
+  - Left stick pulled back (hold, past 0.2 deadzone) = intake reverse (clear a jam)
+  - Right stick pushed forward (hold, past 0.2 deadzone) = spin up launcher
+  - `gamepad2.a` = request a shot (marks "firing" once launcher is at target velocity and all Pedro
+    safety gates are open; with the gravity-fed chute there is no separate feed step - a game piece
+    already sitting against the spinning wheel launches on its own)
+  - `gamepad2.b` = stop launcher (and cancel pending shot)
+  - `gamepad2.x` = stop all launcher mechanisms (and cancel pending shot)
+  - (2026-11-08: moved intake/launcher from gamepad2 bumpers/D-pad to gamepad2 sticks - driver
+    preferred not having to move thumbs off the sticks to reach bumpers/D-pad)
 
 Rule for future changes:
 - When a gamepad 2 button is added, update this file immediately.

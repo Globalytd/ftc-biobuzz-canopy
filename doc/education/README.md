@@ -25,6 +25,9 @@ Style: Short steps, simple words
 6. `../controls/BUTTON_CONTROLS_REFERENCE.md`
    - All gamepad1 and gamepad2 button controls in one place
    - Update this file whenever a button control changes
+7. `../arena/ARENA_LOCATIONS_REFERENCE.md`
+   - Canonical BioBuzz arena location guide
+   - Red and Blue alliance shooting and loading/parking zones
 
 ---
 

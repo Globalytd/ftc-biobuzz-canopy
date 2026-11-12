@@ -1,0 +1,83 @@
+IMU Localizer Tuning Log Sheet (Fill-In)
+
+Session Header
+Date,
+Event/Location,
+Team,
+Robot Name,
+Driver,
+Programmer,
+Battery Voltage (start),
+Floor Type (tile/mat),
+Notes,
+
+Current Constants (Round Start)
+xPodOffset,
+yPodOffset,
+forwardTicksToInches,
+strafeTicksToInches,
+xPodDirection,
+yPodDirection,
+IMU orientation notes,
+
+Pass Targets (Reference)
+Stationary drift <= 1.0 in
+Stationary heading drift <= 1.5 deg
+Closure XY error <= 2.0 in
+Closure heading error <= 4.0 deg
+
+Round 1
+A - Stationary Drift Test (10s)
+Run,Drift (in),Heading Drift (deg),Pass/Fail,Notes
+A1,,,,
+A2,,,,
+A3,,,,
+A4,,,,
+A5,,,,
+
+B - Rotate Closure Test (CW then CCW)
+Run,XY Closure Error (in),IMU Closure (deg),Pose Heading Closure (deg),Pass/Fail,Notes
+B1,,,,,
+B2,,,,,
+B3,,,,,
+B4,,,,,
+B5,,,,,
+
+X - Forward/Back Closure Test
+Run,XY Closure Error (in),IMU Closure (deg),Pose Heading Closure (deg),Pass/Fail,Notes
+X1,,,,,
+X2,,,,,
+X3,,,,,
+X4,,,,,
+X5,,,,,
+
+Y - Strafe/Back Closure Test
+Run,XY Closure Error (in),IMU Closure (deg),Pose Heading Closure (deg),Pass/Fail,Notes
+Y1,,,,,
+Y2,,,,,
+Y3,,,,,
+Y4,,,,,
+Y5,,,,,
+
+Round 1 Summary
+Biggest issue pattern (direction/scale/offset/heading/noise),
+Planned changes before Round 2,
+Why these changes,
+Confidence (Low/Med/High),
+
+Round 2 (repeat sections as needed)
+Use same A/B/X/Y tables and summarize again.
+
+Final Tuned Values (Copy to code)
+xPodOffset,
+yPodOffset,
+forwardTicksToInches,
+strafeTicksToInches,
+xPodDirection,
+yPodDirection,
+
+Sign-Off
+Tuning complete by,
+Date,
+Verified by,
+Final notes,

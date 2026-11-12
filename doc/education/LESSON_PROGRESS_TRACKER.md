@@ -31,6 +31,8 @@ Keep notes short.
 | 2026-09-21 | doc/education/02-driver-station-map.md | Added Driver Station mapping lesson | Help students connect code to DS |
 | 2026-09-21 | doc/education/03-run-and-deploy.md | Added run/deploy lesson | Teach safe robot start flow |
 | 2026-09-21 | doc/education/README.md | Added lesson index | Navigation |
+| 2026-11-08 | gytd/pathing/MecanumEncoderIMULocalizer.java, PedroFollowerFactory.java | Replaced drive-motor-encoder misuse of TwoWheelLocalizer with a correct mecanum+IMU localizer | Fixed Pedro shoot-assist oscillation (see Pedro_Pathing_Explained.md section 2, Localizer) |
+| 2026-11-08 | gytd/test/TestArenaMapperPedro.java | Fixed HOME_POSE heading from 0 deg to 90 deg | Matched project's "90 deg = facing downfield" convention; fixed swapped row/column movement (see Pedro_Pathing_Explained.md section 6b) |
 
 Add new rows each class.
 

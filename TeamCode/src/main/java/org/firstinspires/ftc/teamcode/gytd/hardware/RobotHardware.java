@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.gytd.hardware;
 
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -41,9 +40,13 @@ public class RobotHardware {
         backRightDrive = hardwareMap.get(DcMotorEx.class, HardwareConstants.BACK_RIGHT_DRIVE);
 
         // Positive axial input should move the robot forward.
+        assert frontLeftDrive != null;
         frontLeftDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        assert backLeftDrive != null;
         backLeftDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        assert frontRightDrive != null;
         frontRightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        assert backRightDrive != null;
         backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -56,17 +59,13 @@ public class RobotHardware {
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //TODO: finish this and intitalize each subsystem correctly.
         // Initialize intake motor
-        launchMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.INTAKE_MOTOR);
-        launchMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        launchMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.LAUNCH_MOTOR);
+       // launchMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         imu = hardwareMap.get(IMU.class, HardwareConstants.IMU_NAME);
-        IMU.Parameters parameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+        IMU.Parameters parameters = new IMU.Parameters(HardwareConstants.IMU_ORIENTATION_ON_ROBOT);
         imu.initialize(parameters);
         imu.resetYaw();
 
@@ -100,6 +99,10 @@ public class RobotHardware {
         return intakeMotor;
     }
 
+    public DcMotorEx getLaunchMotor() {
+        return launchMotor;
+    }
+
     public double getHeadingRadians() {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
@@ -124,4 +127,3 @@ public class RobotHardware {
         intakeMotor.setPower(0.0);
     }
 }
-

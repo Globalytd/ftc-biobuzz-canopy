@@ -483,6 +483,389 @@ Next action:
 
 ---
 
+## Session 009
+
+Date: 2026-11-08
+Driver/Tester: TODO
+Current Phase: Phase 4 - Localizer root-cause fix for shoot-assist oscillation
+Branch: `integration/pedro-pathing`
+Goal for today: Diagnose and fix erratic/oscillating robot movement whenever Pedro shoot-assist (gamepad1 A/B) took control.
+
+Files touched:
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/pathing/MecanumEncoderIMULocalizer.java` (new)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/pathing/PedroMecanumLocalizerConstants.java` (new)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/pathing/PedroTwoWheelLocalizerConstants.java`
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/pathing/PedroFollowerFactory.java`
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/test/TestArenaMapperPedro.java`
+- `doc/api-integrations/PEDRO_PATHING_SESSION_LOG.md`
+- `doc/education/Pedro_Pathing_Explained.md`
+- `doc/education/LESSON_PROGRESS_TRACKER.md`
+
+Symbols touched:
+- `MecanumEncoderIMULocalizer` (implements `Localizer`)
+- `PedroMecanumLocalizerConstants.TICKS_TO_INCHES`
+- `PedroTwoWheelLocalizerConstants.HAS_DEAD_WHEEL_PODS`
+- `PedroTwoWheelLocalizerConstants.X_POD_NAME` / `Y_POD_NAME`
+- `PedroFollowerFactory.createTwoWheelFollower(...)`
+- `PedroFollowerFactory.createDeadWheelLocalizer(...)`
+- `TestArenaMapperPedro.HOME_POSE`
+
+What changed (short bullets):
+- **Root cause found:** this robot has no dead-wheel odometry pods, but the old code fed two
+  **powered mecanum drive-motor encoders** (`front_left_drive`, `front_right_drive`) directly into
+  Pedro's `TwoWheelLocalizer`, which is only designed for passive, free-spinning dead-wheel pods.
+  Mecanum drive wheels slip sideways by design, so the localizer's pose estimate diverged from the
+  real robot pose any time the assist path strafed or turned - and the Foresight path controller
+  then "corrected" toward that bad estimate, which is what looked like oscillation/erratic motion.
+- Added `MecanumEncoderIMULocalizer`: a custom `Localizer` that uses all four existing drive
+  encoders (correct mecanum forward kinematics) for translation, and the REV Hub IMU (not affected
+  by wheel slip) for heading. This is the new default localizer since this robot has no dead wheels.
+- Added `PedroMecanumLocalizerConstants.TICKS_TO_INCHES` - a rough starting estimate that **must be
+  field-calibrated** (drive a known distance, compare to reported pose delta, scale accordingly).
+- Added `PedroTwoWheelLocalizerConstants.HAS_DEAD_WHEEL_PODS` flag (default `false`). If the team
+  installs real dead-wheel pods later, flip this to `true`, set `X_POD_NAME`/`Y_POD_NAME` to the
+  pods' actual encoder port names, and `PedroFollowerFactory` will automatically build Pedro's
+  built-in (more accurate) `TwoWheelLocalizer` instead - no other code changes needed.
+- Fixed a second, separate bug found while testing: `TestArenaMapperPedro.HOME_POSE` declared
+  heading `0.0`, but every other pose in this project (see `TeleOpConstants.RED_HOME_POSE`) uses
+  heading `90°` to mean "robot physically facing downfield/away from the driver." Because the
+  robot is actually placed facing downfield at A1 (matching real match setup), the mismatched 0°
+  heading caused columns (A1->B1, meant to be sideways) to drive the robot forward instead, and
+  rows (A1->A2, meant to be forward) to strafe it sideways instead. Fixed by changing `HOME_POSE`
+  to `new Pose(12.0, 12.0, Math.toRadians(90.0))` to match the project's field-heading convention.
+
+Why this matters for drivers/students (plain language):
+- The robot's self-reported position was never accurate once dead wheels were ruled out and the
+  old setup kept reading two drive motors as if they were free-spinning odometry wheels. Think of
+  it like a car's speedometer reading tire spin while the tires are sliding on ice - the number on
+  the dash stops matching how far the car actually went. Pedro believed that wrong number and kept
+  "correcting" toward a target it was mis-estimating distance/angle to, causing the shaking/erratic
+  motion you saw when pressing A/B.
+- Separately, `HOME_POSE`'s heading is like telling the GPS app "you're facing north" when you're
+  actually facing east - every direction it then gives you ("turn right") will be rotated 90° from
+  what you expect, even though the GPS math itself is working correctly. That is exactly what the
+  `TestArenaMapperPedro` symptom was: not a math bug, a "which way is the robot actually pointed at
+  the start?" bug.
+
+Button controls changed?
+- no
+
+Behavior change type:
+- default path changed (localizer swap affects both `RedTeamPedroTeleOp` and
+  `TestArenaMapperPedro`, since both go through `PedroFollowerFactory`)
+
+Build result:
+- `:TeamCode:compileDebugJavaWithJavac` -> BUILD SUCCESSFUL
+
+Robot tests run:
+- Not run in this terminal session (perform on robot):
+  - Stationary stability: power on, don't touch sticks, confirm `Pose` telemetry stays essentially
+    fixed for ~10s.
+  - Straight-line calibration: drive a measured distance (e.g. 48in) and compare to the reported
+    pose delta; adjust `PedroMecanumLocalizerConstants.TICKS_TO_INCHES` until they match within
+    ~1in over several feet.
+  - Strafe test: confirm strafe direction/magnitude matches physical movement.
+  - Rotation test: confirm heading telemetry matches physical turn direction/amount.
+  - `RED team Pedro`: confirm `A` (loading side) and `B` (garden side) assist now converge smoothly
+    instead of oscillating.
+  - `Test: Arena Mapper Pedro`: place robot at A1 facing downfield (away from driver), confirm
+    selecting `B1` now moves sideways and `A2` now moves forward/away.
+
+What passed:
+- Software build passed with the new localizer, the dead-wheel-pod swap flag, and the
+  `TestArenaMapperPedro` heading fix.
+
+What failed:
+- No software compile failures. Physical robot validation is still pending - a clean compile does
+  not prove the real robot behavior is correct; the tests above must be run on the physical robot.
+
+Regression checks status:
+- Software compile check: PASS
+- Driver Station/robot runtime checks: PENDING (next robot session)
+
+Rollback tag status:
+- No new rollback tag created in this session.
+
+Next action:
+- Run the physical validation checklist above and record results in the Phase 3 pilot run data
+  table or a new table in this log.
+- Calibrate `PedroMecanumLocalizerConstants.TICKS_TO_INCHES` from real measured-distance tests.
+- If/when dead-wheel pods are installed: wire them to unused encoder ports, update
+  `PedroTwoWheelLocalizerConstants.X_POD_NAME`/`Y_POD_NAME`, flip `HAS_DEAD_WHEEL_PODS` to `true`,
+  and re-calibrate using Pedro's `com.pedropathing:tuning` OpModes.
+
+---
+
+## Session 010
+
+Date: 2026-11-08
+Driver/Tester: TODO
+Current Phase: Phase 4 - Launcher/intake control fixes
+Branch: `integration/pedro-pathing`
+Goal for today: Fix gamepad2 A/B not firing the launcher, and the intake having no controls wired at all in the real TeleOps.
+
+Files touched:
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/subsystems/LauncherSubsystem.java` (renamed from `ShooterSubsystem.java`)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/subsystems/LauncherConstants.java` (new)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/test/TestLauncher.java` (renamed from `TestShooter.java`)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/robot/Robot.java`
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/teleop/RedTeamPedroTeleOp.java`
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/teleop/LinearNearAndFarPedroTeleOp.java`
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/teleop/RedTeamPedroTeleOpBKP.java` (mechanical rename only, dead/unused backup OpMode)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/autonomous/AutonomousBasic.java`
+- `doc/controls/BUTTON_CONTROLS_REFERENCE.md`
+
+Symbols touched:
+- `LauncherSubsystem` (renamed from `ShooterSubsystem`), `LauncherSubsystem.LauncherState`
+- `LauncherSubsystem.startLauncher()` / `stopLauncher()` (renamed from `startShooter()`/`stopShooter()`)
+- `LauncherConstants.DEFAULT_TARGET_VELOCITY_RAD_PER_SEC`
+- `Robot.getLauncher()` (renamed from `getShooter()`)
+- `RedTeamPedroTeleOp.updateLauncherControls()` / `updateIntakeControls()` (new)
+- `LinearNearAndFarPedroTeleOp.updateLauncherControls()` / `updateIntakeControls()` (new)
+
+What changed (short bullets):
+- **Root cause 1 (why A/B did nothing on the launcher):** `LauncherSubsystem` (then
+  `ShooterSubsystem`) defaults its target velocity to `0.0`, and nothing in either real TeleOp ever
+  called `setTargetVelocity(...)` with a real value. Pressing "spin up" called `startLauncher()`,
+  which commanded the motor to hold a target velocity of **0** - i.e. effectively "stay off," even
+  though the button logic itself was correct. Fixed by adding `LauncherConstants` with a tunable
+  `DEFAULT_TARGET_VELOCITY_RAD_PER_SEC`, applied once right after `Robot` is constructed in both
+  `RedTeamPedroTeleOp` and `LinearNearAndFarPedroTeleOp`. **This placeholder value still needs to be
+  tuned on the real robot using `Test: Launcher`** (see that OpMode's Javadoc).
+- **Root cause 2 (why nothing triggered the intake):** `RedTeamPedroTeleOp` and
+  `LinearNearAndFarPedroTeleOp` both created an `IntakeSubsystem` and displayed its status in
+  telemetry, but never called `intake()`/`reverse()`/`stop()` from any gamepad button - there was no
+  `updateIntakeControls()` method at all. Added one, mapped to gamepad2 D-pad up (forward) and D-pad
+  down (reverse), matching the project's existing "hold while active" pattern used elsewhere.
+- Renamed `ShooterSubsystem` -> `LauncherSubsystem` (and `ShooterState` -> `LauncherState`,
+  `startShooter`/`stopShooter` -> `startLauncher`/`stopLauncher`, `Robot.getShooter()` ->
+  `Robot.getLauncher()`) per driver/team preference for "launcher" terminology. This also now
+  matches the existing hardware config name `launch_motor` in `HardwareConstants`, which was already
+  using launcher terminology even before this rename.
+- Renamed `Test: Shooter` OpMode to `Test: Launcher` (same file moved, same controls/behavior).
+- `RedTeamPedroTeleOpBKP.java` (an older, unused/dead backup OpMode) was given the same mechanical
+  symbol renames only, just to keep the module compiling - it was not otherwise touched or fixed.
+
+Why this matters for drivers/students (plain language):
+- The launcher bug is like a car with cruise control set to "0 mph": pressing the gas pedal
+  (gamepad2 right bumper) correctly told the cruise control to engage, but the target speed it was
+  told to hold was zero the whole time, so the engine never revved. Setting a real default target
+  speed at startup is like setting cruise control to an actual speed before engaging it.
+- The intake bug was simpler: the code to make the intake spin already existed and already worked
+  (see `Test: Intake`), it just was never connected to a button inside the real driving OpModes -
+  like a working light switch that was never wired to the light fixture.
+
+Button controls changed?
+- yes
+- Updated `doc/controls/BUTTON_CONTROLS_REFERENCE.md` (new Gamepad 2 section for
+  `RedTeamPedroTeleOp`/`LinearNearAndFarPedroTeleOp`, renamed `Test: Shooter` rows to `Test: Launcher`)
+
+Behavior change type:
+- default path changed (launcher now actually spins when commanded; intake now actually responds to
+  gamepad2 D-pad)
+
+Build result:
+- `:TeamCode:compileDebugJavaWithJavac` -> BUILD SUCCESSFUL
+
+Robot tests run:
+- Not run in this terminal session (perform on robot):
+  - `Test: Launcher`: confirm D-pad up/down tuning still works, find a good real target velocity.
+  - Put the tuned value into `LauncherConstants.DEFAULT_TARGET_VELOCITY_RAD_PER_SEC`.
+  - `RED team Pedro`: confirm gamepad2 right bumper spins the launcher, `A` fires once loaded/ready,
+    `B`/`X` stop it, D-pad up/down on gamepad2 run the intake forward/reverse.
+  - Repeat on `RED team Pedro Linear motion`.
+  - Confirm `Test: Intake` and `Test: Magazine` are unaffected (not touched this session).
+
+What passed:
+- Software build passed after the full rename and control wiring across all affected OpModes.
+
+What failed:
+- No software compile failures. `LauncherConstants.DEFAULT_TARGET_VELOCITY_RAD_PER_SEC` is still an
+  unverified placeholder and must be tuned on the physical robot before competition use.
+
+Regression checks status:
+- Software compile check: PASS
+- Driver Station/robot runtime checks: PENDING (next robot session)
+
+Rollback tag status:
+- No new rollback tag created in this session.
+
+Next action:
+- Tune and record the real launcher target velocity from `Test: Launcher`.
+- Decide if gamepad2 D-pad is the final intake control mapping, or if the team wants intake moved to
+  bumpers/triggers instead.
+
+---
+
+## Session 011
+
+Date: 2026-11-08
+Driver/Tester: TODO
+Current Phase: Phase 4 - Remove magazine, remap gamepad2 to bumpers
+Branch: `integration/pedro-pathing`
+Goal for today: Remove the magazine/indexer subsystem (team is using a passive gravity-fed chute
+instead) and move intake/launcher controls from D-pad to gamepad2 bumpers.
+
+Files touched:
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/subsystems/MagazineSubsystem.java` (deleted)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/test/TestMagazine.java` (deleted)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/teleop/RedTeamPedroTeleOpBKP.java` (deleted - dead/unused backup, not worth maintaining through this change)
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/robot/Robot.java`
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/teleop/RedTeamPedroTeleOp.java`
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/teleop/LinearNearAndFarPedroTeleOp.java`
+- `doc/controls/BUTTON_CONTROLS_REFERENCE.md`
+
+Symbols touched:
+- `Robot.getMagazine()` (removed)
+- `RedTeamPedroTeleOp.updateIntakeControls()` / `updateLauncherControls()`
+- `LinearNearAndFarPedroTeleOp.updateIntakeControls()` / `updateLauncherControls()`
+
+What changed (short bullets):
+- Deleted `MagazineSubsystem` and its `Test: Magazine` OpMode entirely. The team is using a passive
+  gravity-fed chute from intake straight to the launcher wheel instead of a powered indexer motor -
+  there is no "load"/"feed one"/"reverse magazine" step to control anymore.
+- `Robot` no longer constructs or exposes a magazine subsystem; `stopAll()` no longer stops it.
+- Remapped gamepad2 controls in both `RedTeamPedroTeleOp` and `LinearNearAndFarPedroTeleOp`:
+  - Left bumper (hold) now runs intake forward (previously D-pad up).
+  - Right bumper (hold) still spins up the launcher (unchanged).
+  - D-pad down (hold) still reverses intake to clear jams.
+  - `gamepad2.y` (previously magazine load) and the previous left-bumper magazine-reverse action are
+    gone - there is nothing left for the magazine to do.
+  - `gamepad2.a` ("request shot") still exists as a safety gate: once the launcher reaches target
+    velocity and Pedro's shoot-pose/pose-recovery gates are open, it calls `launcher.markFiring()`
+    for telemetry/state tracking. There is no feed-motor call anymore (gravity does the feeding),
+    so this is now purely a "state/telemetry" marker, not a physical action - flagged here in case a
+    future sensor-based gate needs to hook in at this exact point.
+
+Why this matters for drivers/students (plain language):
+- Think of the old magazine like a vending machine with a motorized shelf that pushed one item
+  forward at a time when you pressed a button. The new gravity-fed chute is like a gumball machine
+  dispenser slide - once a ball is intaken, it just rolls downhill into the launcher wheel on its
+  own. There is nothing left to "push," so all the magazine code and its buttons were deleted rather
+  than left around doing nothing.
+- Controls moved from D-pad to bumpers because holding a bumper is more natural for a continuous
+  "run while held" action (intake, launcher) than D-pad, which the team wanted to reserve for other
+  uses later.
+
+Button controls changed?
+- yes
+- Updated `doc/controls/BUTTON_CONTROLS_REFERENCE.md` (removed `Test: Magazine` rows, rewrote the
+  Gamepad 2 section for `RedTeamPedroTeleOp`/`LinearNearAndFarPedroTeleOp`)
+
+Behavior change type:
+- default path changed (magazine removed entirely; intake/launcher gamepad2 mapping changed from
+  D-pad to bumpers)
+
+Build result:
+- `:TeamCode:compileDebugJavaWithJavac` -> BUILD SUCCESSFUL
+
+Robot tests run:
+- Not run in this terminal session (perform on robot):
+  - `RED team Pedro`: confirm gamepad2 left bumper runs intake forward, right bumper spins up the
+    launcher, D-pad down reverses intake, `A`/`B`/`X` behave as described above.
+  - Repeat on `RED team Pedro Linear motion`.
+  - Confirm a game piece actually flows intake -> chute -> launcher wheel under gravity alone with
+    no powered assist, and confirm it launches reliably once the wheel is at target speed.
+
+What passed:
+- Software build passed after removing `MagazineSubsystem`/`TestMagazine` and remapping gamepad2.
+
+What failed:
+- No software compile failures. Physical gravity-feed reliability (does the piece always reach the
+  wheel without a stuck/jam point) has not been validated on the robot yet.
+
+Regression checks status:
+- Software compile check: PASS
+- Driver Station/robot runtime checks: PENDING (next robot session)
+
+Rollback tag status:
+- No new rollback tag created in this session.
+
+Next action:
+- Validate gravity-feed reliability on the physical chute; if pieces jam, consider whether a passive
+  deflector/ramp angle change is needed (software can't fix a mechanical jam).
+- Decide the final meaning of `gamepad2.a`/"request shot" now that there's no feed motor - keep it as
+  a pure safety/telemetry gate, or remove it if the team decides any spinning wheel should fire
+  automatically.
+
+---
+
+## Session 012
+
+Date: 2026-11-08
+Driver/Tester: TODO
+Current Phase: Phase 4 - Intake/launcher moved from bumpers to joysticks
+Branch: `integration/pedro-pathing`
+Goal for today: Driver preference - replace gamepad2 bumper/D-pad controls for intake and launcher
+with joystick push gestures so both thumbs can stay on the sticks.
+
+Files touched:
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/teleop/RedTeamPedroTeleOp.java`
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/gytd/opmodes/teleop/LinearNearAndFarPedroTeleOp.java`
+- `doc/controls/BUTTON_CONTROLS_REFERENCE.md`
+
+Symbols touched:
+- `RedTeamPedroTeleOp.GAMEPAD2_STICK_DEADZONE` (new)
+- `RedTeamPedroTeleOp.updateIntakeControls()` / `updateLauncherControls()`
+- `LinearNearAndFarPedroTeleOp.GAMEPAD2_STICK_DEADZONE` (new)
+- `LinearNearAndFarPedroTeleOp.updateIntakeControls()` / `updateLauncherControls()`
+
+What changed (short bullets):
+- Replaced gamepad2 left bumper (intake forward) / D-pad down (intake reverse) with: push the left
+  stick forward (away from the driver) for intake forward, pull it back for intake reverse. A
+  `GAMEPAD2_STICK_DEADZONE` of `0.2` ignores small stick drift/noise near center.
+- Replaced gamepad2 right bumper (spin up launcher) with: push the right stick forward past the
+  same deadzone.
+- `gamepad2.a`/`b`/`x` (request shot / stop launcher / stop all) are unchanged.
+- Applied identically to both `RedTeamPedroTeleOp` and `LinearNearAndFarPedroTeleOp`.
+
+Why this matters for drivers/students (plain language):
+- This is purely an ergonomics change, not a logic change - the same "is this input past a small
+  threshold" check that used to read `gamepad2.left_bumper` (a true/false button) now reads
+  `-gamepad2.left_stick_y > 0.2` (a continuous stick position turned into a true/false check). The
+  driver's thumb never has to leave the stick to reach a bumper or D-pad anymore.
+
+Button controls changed?
+- yes
+- Updated `doc/controls/BUTTON_CONTROLS_REFERENCE.md` (Gamepad 2 section rewritten; scope note
+  updated to explain why stick positions are documented here as an exception to the normal
+  "stick movement values are not listed" rule)
+
+Behavior change type:
+- default path changed (intake/launcher gamepad2 input source changed from digital bumpers/D-pad to
+  analog stick-push-as-trigger)
+
+Build result:
+- `:TeamCode:compileDebugJavaWithJavac` -> BUILD SUCCESSFUL
+
+Robot tests run:
+- Not run in this terminal session (perform on robot):
+  - Push gamepad2 left stick forward -> intake runs forward; pull back -> intake reverses; center ->
+    intake stops.
+  - Push gamepad2 right stick forward -> launcher spins up; release/center -> launcher stops.
+  - Confirm the 0.2 deadzone feels right (no accidental intake/launcher activation from a stick that
+    is merely resting near center but not perfectly at zero).
+
+What passed:
+- Software build passed after the control remap.
+
+What failed:
+- No software compile failures. Deadzone value (0.2) is a reasonable starting guess, not yet
+  confirmed comfortable by an actual driver on the physical controller.
+
+Regression checks status:
+- Software compile check: PASS
+- Driver Station/robot runtime checks: PENDING (next robot session)
+
+Rollback tag status:
+- No new rollback tag created in this session.
+
+Next action:
+- Get driver feedback on the 0.2 deadzone and adjust `GAMEPAD2_STICK_DEADZONE` if it feels too
+  sensitive or too sluggish.
+
+---
+
 ## Session Template
 
 ### Phase 3 pilot run data table

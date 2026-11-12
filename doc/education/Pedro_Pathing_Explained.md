@@ -78,25 +78,46 @@ Important: in Pedro, heading is usually stored in radians.
 
 The localizer tells Pedro where the robot really is on the field.
 
-This project uses a `TwoWheelLocalizer` with:
-- wheel pod data;
-- an IMU;
-- wheel tick to inch conversion.
+**Update (2026-11-08): this project does NOT use dead-wheel odometry pods.** Earlier versions of
+this doc (and an earlier version of the code) assumed a `TwoWheelLocalizer` fed by dedicated,
+free-spinning "dead wheel" pods. That is the normal/best way to do it, but this robot doesn't have
+those pods installed yet, and the code used to make a dangerous mistake: it fed Pedro's
+`TwoWheelLocalizer` with ticks from two of the **powered drive motors** instead.
 
-This is important because even a small offset can cause the robot to drift or think it is somewhere else.
+Why that was a bug: `TwoWheelLocalizer` assumes its wheels spin freely and never slip. Mecanum
+drive wheels are the opposite of that - their rollers are *designed* to slide sideways so the
+robot can strafe. Feeding slipping-wheel data into a "this wheel never slips" localizer meant
+Pedro's idea of where the robot was could drift far from reality any time the robot turned or
+strafed - which is exactly when the one-touch shoot-assist paths run. Pedro would then try to
+"correct" toward a target it was mis-judging the distance/angle to, which is what looked like the
+robot shaking/oscillating when you pressed `A` or `B`.
 
-The localizer is configured in `createFollower()`:
+**The fix:** this project now uses a custom localizer, `MecanumEncoderIMULocalizer`
+(`gytd/pathing/MecanumEncoderIMULocalizer.java`), which:
+- reads all four drive motor encoders (not just two) and combines them with the correct mecanum
+  math, so it at least accounts for how all four wheels actually move together; and
+- trusts the REV Hub IMU for heading, since the IMU doesn't care about wheel slip at all.
+
+It is still not as accurate as true dead-wheel pods (powered wheels can still slip a little under
+hard acceleration or when bumped by another robot), but it is far more consistent than the old
+2-motor-encoder setup.
+
+`PedroFollowerFactory` picks the localizer automatically:
 
 ```java
-TwoWheelConfig localizerConfig = new TwoWheelConfig(c -> {
-    c.xPodName.set(HardwareConstants.FRONT_LEFT_DRIVE);
-    c.yPodName.set(HardwareConstants.FRONT_RIGHT_DRIVE);
-    c.imuName.set(HardwareConstants.IMU_NAME);
-    ...
-});
+Localizer localizer = PedroTwoWheelLocalizerConstants.HAS_DEAD_WHEEL_PODS
+        ? createDeadWheelLocalizer(hardwareMap)
+        : new MecanumEncoderIMULocalizer(hardwareMap);
 ```
 
-If the robot is not driving to the right place, this is one of the first areas to tune.
+If the team installs real dead-wheel pods later: wire each pod's encoder into an **unused** motor
+port (never reuse a drive motor's name/port), update `X_POD_NAME`/`Y_POD_NAME` in
+`PedroTwoWheelLocalizerConstants` to match, and flip `HAS_DEAD_WHEEL_PODS` to `true`. No other code
+needs to change - Pedro's built-in `TwoWheelLocalizer` will take over and should be noticeably more
+accurate than the encoder+IMU fallback.
+
+This is important because even a small offset can cause the robot to drift or think it is
+somewhere else.
 
 ### Drivetrain
 
@@ -207,6 +228,36 @@ That means the robot is trying to move to a place on the field, not just move re
 This is why field-centric control matches Pedro better than robot-centric control.
 
 If the driver wants to drive "to a field position," field-centric is easier and more predictable.
+
+## 6b. The "which way am I actually facing?" trap (important!)
+
+Every starting `Pose` in this project has an `x`, a `y`, **and a heading**. The heading isn't just
+decoration - it tells Pedro which physical direction on the field counts as "facing forward" at
+that pose. If the heading you write in code doesn't match the direction the robot is *actually*
+physically pointed when you call `follower.setPose(...)`, every path Pedro drives afterward will be
+rotated by that same mismatch - even though all the math inside Pedro is working perfectly.
+
+This project's convention (see `TeleOpConstants.RED_HOME_POSE`) is:
+- **heading 90° = robot physically facing downfield, away from the driver** (the normal way a
+  robot is placed at the start of a match).
+- Under this convention, Y position = downfield distance, X position = side-to-side position.
+
+A real bug this exact mistake caused: `TestArenaMapperPedro.HOME_POSE` was originally written as
+`new Pose(12.0, 12.0, 0.0)` - heading **0°**, not 90°. But the robot is still placed facing
+downfield at A1 during testing (matching real match setup). That mismatch meant:
+- Selecting tile **B1** (one column over, meant to be a sideways move) made the robot drive
+  **forward/away** instead.
+- Selecting tile **A2** (one row forward, meant to be a forward move) made the robot **strafe
+  sideways** instead.
+
+The fix was one line: change the heading in `HOME_POSE` from `0.0` to `Math.toRadians(90.0)` so it
+matches how the robot is actually placed on the field. Nothing about the localizer or path math
+needed to change.
+
+**Lesson for drivers/maintainers:** whenever you add a new starting `Pose` (a new home tile, a new
+test OpMode, a new alliance color), ask "if I stand the robot at this spot exactly the way we do at
+a real match, which way is its front bumper pointing?" and make sure the heading number matches
+that - using this project's 90°-is-downfield convention - not just `0.0` as a lazy default.
 
 ## 7. Good next steps for the team
 
