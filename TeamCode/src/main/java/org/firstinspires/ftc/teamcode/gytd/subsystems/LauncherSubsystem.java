@@ -21,12 +21,17 @@ public class LauncherSubsystem {
         OFF,
         SPINNING_UP,
         READY,
-        FIRING
+        FIRING,
+        REVERSING
     }
 
     // Tune these during testing.
     private static final double DEFAULT_TARGET_VELOCITY = 0.0;
     private static final double DEFAULT_VELOCITY_TOLERANCE = 50.0;
+    // Scale applied to the forward target velocity when manually reversing the launcher wheel
+    // (e.g. to clear a jammed game piece). Negative so the motor spins backward; magnitude is
+    // reduced because reversing does not need to be as fast as launching.
+    private static final double REVERSE_VELOCITY_SCALE = -0.5;
 
     private final DcMotorEx launcherMotor;
     private LauncherState state = LauncherState.OFF;
@@ -67,6 +72,20 @@ public class LauncherSubsystem {
         }
     }
 
+    /**
+     * Spins the launcher wheel backward at a reduced speed. Useful for clearing a jammed game
+     * piece out of the gravity-fed chute without having to fully launch it.
+     */
+    public void reverseLauncher() {
+        state = LauncherState.REVERSING;
+        if (launcherMotor != null) {
+            double reverseVelocity = targetVelocity > 0.0
+                    ? targetVelocity * REVERSE_VELOCITY_SCALE
+                    : LauncherConstants.DEFAULT_TARGET_VELOCITY_RAD_PER_SEC * REVERSE_VELOCITY_SCALE;
+            launcherMotor.setVelocity(reverseVelocity, AngleUnit.RADIANS);
+        }
+    }
+
     public double getVelocity() {
         if (launcherMotor == null) {
             return 0.0;
@@ -84,7 +103,7 @@ public class LauncherSubsystem {
     }
 
     public void updateState() {
-        if (state == LauncherState.OFF || state == LauncherState.FIRING) {
+        if (state == LauncherState.OFF || state == LauncherState.FIRING || state == LauncherState.REVERSING) {
             return;
         }
         state = atTargetVelocity() ? LauncherState.READY : LauncherState.SPINNING_UP;

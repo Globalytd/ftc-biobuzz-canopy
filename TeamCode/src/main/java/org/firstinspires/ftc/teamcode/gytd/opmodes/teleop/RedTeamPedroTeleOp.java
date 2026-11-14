@@ -181,14 +181,19 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
         boolean shootPressed = gamepad2.a && !lastShootButton;
         boolean stopLauncherPressed = gamepad2.b && !lastStopLauncherButton;
         boolean stopAllPressed = gamepad2.x && !lastStopAllButton;
-        // Push the right stick forward (away from the driver) to spin up the launcher.
+// Push the right stick forward (away from the driver) to spin up the launcher.
+// Pull the right stick back (toward the driver) to reverse the launcher wheel, e.g. to
+// clear a jammed game piece out of the gravity-fed chute.
         boolean spinUpRequested = -gamepad2.right_stick_y > GAMEPAD2_STICK_DEADZONE;
+        boolean reverseRequested = -gamepad2.right_stick_y < -GAMEPAD2_STICK_DEADZONE;
 
         boolean pausedForPoseRecovery = assist.isPausedForPoseRecovery();
 
-        // Keep the launcher available for manual use at any time.
+// Keep the launcher available for manual use at any time.
         if (stopLauncherPressed || stopAllPressed) {
             stopLaunchingMechanisms();
+        } else if (reverseRequested) {
+            launcher.reverseLauncher();
         } else if (spinUpRequested) {
             launcher.startLauncher();
         } else if (launcher.getState() != LauncherSubsystem.LauncherState.OFF) {
