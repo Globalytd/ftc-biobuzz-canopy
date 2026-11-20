@@ -74,6 +74,9 @@ Current status:
   - Left stick pushed forward (hold, past 0.2 deadzone) = intake forward
   - Left stick pulled back (hold, past 0.2 deadzone) = intake reverse (clear a jam)
   - Right stick pushed forward (hold, past 0.2 deadzone) = spin up launcher
+  - Left/right bumper = decrease/increase launcher target by 2 rad/s per press (minimum 0,
+    no upper limit); target and actual velocity appear in telemetry
+  - In `RED team Pedro`, right stick pulled back reverses the launcher to clear a jam
   - `gamepad2.a` = request a shot (marks "firing" once launcher is at target velocity and all Pedro
     safety gates are open; with the gravity-fed chute there is no separate feed step - a game piece
     already sitting against the spinning wheel launches on its own)
@@ -94,4 +97,3 @@ Before merging any control change, confirm:
 - [ ] The matching OpMode or subsystem was updated
 - [ ] The session log mentions the control change
 - [ ] The change is reflected in student-facing docs
-

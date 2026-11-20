@@ -4,6 +4,7 @@ import com.pedropathing.math.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.util.LauncherSpeedControl;
 import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.util.ShootingSide;
 import org.firstinspires.ftc.teamcode.gytd.pathing.PedroShootAssist;
 import org.firstinspires.ftc.teamcode.gytd.pathing.PathingConfig;
@@ -43,6 +44,7 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
     private IntakeSubsystem intake;
     private LauncherSubsystem launcher;
     private PedroShootAssist assist;
+    private final LauncherSpeedControl launcherSpeedControl = new LauncherSpeedControl();
 
     private boolean pendingShotRequest = false;
     private boolean lastShootButton = false;
@@ -61,6 +63,7 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
             telemetry.addLine("RED team Pedro ready");
             telemetry.addLine("A = loading-side assist, B = garden-side assist, X = cancel");
             telemetry.addLine("Left stick = drive, right stick = rotate");
+            telemetry.addLine("Gamepad 2 bumpers: launcher speed -/+");
             telemetry.addData("Pedro backend", PathingConfig.getActiveBackendName());
             telemetry.update();
             idle();
@@ -117,6 +120,13 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
             telemetry.addData("Speed scale", drive.getSpeedScale());
             telemetry.addData("Launcher", launcher.getStatus());
             telemetry.addData("Launcher Velocity", "%.2f / %.2f", launcher.getVelocity(), launcher.getTargetVelocity());
+            telemetry.addData("G2 right stick Y / bumpers L,R", "%.2f / %b,%b",
+                    gamepad2.right_stick_y, gamepad2.left_bumper, gamepad2.right_bumper);
+            telemetry.addData("Launch motor mode/power", "%s / %.2f",
+                    robot.getHardware().getLaunchMotor().getMode(),
+                    robot.getHardware().getLaunchMotor().getPower());
+            telemetry.addData("Launch motor raw ticks/s", "%.1f",
+                    robot.getHardware().getLaunchMotor().getVelocity());
             telemetry.addData("Pending Shot", pendingShotRequest);
             telemetry.addData("Intake", intake.getStatus());
             telemetry.addData("Pedro progress", "%.2f", assist.getFollower().completion());
@@ -178,6 +188,7 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
     }
 
     private void updateLauncherControls() {
+        launcherSpeedControl.update(launcher, gamepad2.left_bumper, gamepad2.right_bumper);
         boolean shootPressed = gamepad2.a && !lastShootButton;
         boolean stopLauncherPressed = gamepad2.b && !lastStopLauncherButton;
         boolean stopAllPressed = gamepad2.x && !lastStopAllButton;
@@ -237,4 +248,3 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
         launcher.stopLauncher();
     }
 }
-
