@@ -24,6 +24,6 @@ public final class LauncherConstants {
     }
 
     // TODO: Replace with the real tuned value from Test: Launcher before competition use.
-    public static final double DEFAULT_TARGET_VELOCITY_RAD_PER_SEC = 300.0;
+    public static final double DEFAULT_TARGET_VELOCITY_RAD_PER_SEC = 330.0;
+    public static final double VELOCITY_STEP_RAD_PER_SEC = 25.0;
 }
-

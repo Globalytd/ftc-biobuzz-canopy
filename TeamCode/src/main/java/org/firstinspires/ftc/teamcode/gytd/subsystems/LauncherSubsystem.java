@@ -46,11 +46,13 @@ public class LauncherSubsystem {
         this.launcherMotor = launcherMotor;
     }
 
-    public void setTargetVelocity(double ticksPerSecond) {
-        targetVelocity = Math.max(0.0, ticksPerSecond);
+    public void setTargetVelocity(double radiansPerSecond) {
+        targetVelocity = Math.max(0.0, radiansPerSecond);
 
         // If launcher is already running, apply new speed right away.
-        if (state != LauncherState.OFF) {
+        if (state == LauncherState.REVERSING) {
+            reverseLauncher();
+        } else if (state != LauncherState.OFF) {
             applyVelocityTarget();
         }
     }
@@ -135,5 +137,4 @@ public class LauncherSubsystem {
         }
     }
 }
-
 

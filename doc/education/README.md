@@ -28,6 +28,9 @@ Style: Short steps, simple words
 7. `../arena/ARENA_LOCATIONS_REFERENCE.md`
    - Canonical BioBuzz arena location guide
    - Red and Blue alliance shooting and loading/parking zones
+8. `Custom_Motor_Profiles_Explained.md`
+   - Encoder ticks, gearbox ratios, and the launcher speed mismatch
+   - Creating and safely testing motor profiles for other mechanisms
 
 ---
 
@@ -46,4 +49,3 @@ Style: Short steps, simple words
 - Small quizzes
 - Vocabulary cards
 - Hands-on challenges by subsystem
-
