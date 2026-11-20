@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
+import org.firstinspires.ftc.teamcode.gytd.subsystems.LauncherConstants;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.LauncherSubsystem;
 
 /**
@@ -34,9 +35,6 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.LauncherSubsystem;
 
 @TeleOp(name = "Test: Launcher", group = "Test")
 public class TestLauncher extends LinearOpMode {
-    // Small step so speed can be tuned gradually.
-    private static final double VELOCITY_STEP = 2.0;
-
     @Override
     public void runOpMode() {
         Robot robot = new Robot(hardwareMap);
@@ -58,11 +56,11 @@ public class TestLauncher extends LinearOpMode {
 
             // Edge detect so each tap changes speed only once.
             if (upPressed && !lastUp) {
-                targetVelocity += VELOCITY_STEP;
+                targetVelocity += LauncherConstants.VELOCITY_STEP_RAD_PER_SEC;
                 launcher.setTargetVelocity(targetVelocity);
             }
             if (downPressed && !lastDown) {
-                targetVelocity = Math.max(0.0, targetVelocity - VELOCITY_STEP);
+                targetVelocity = Math.max(0.0, targetVelocity - LauncherConstants.VELOCITY_STEP_RAD_PER_SEC);
                 launcher.setTargetVelocity(targetVelocity);
             }
             lastUp = upPressed;
@@ -89,5 +87,4 @@ public class TestLauncher extends LinearOpMode {
         robot.shutdown();
     }
 }
-
 
