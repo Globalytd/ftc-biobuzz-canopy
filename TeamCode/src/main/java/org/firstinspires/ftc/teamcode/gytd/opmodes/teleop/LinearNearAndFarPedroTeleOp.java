@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.util.ShootingSide;
-import org.firstinspires.ftc.teamcode.gytd.pathing.PedroShootAssist;
+import org.firstinspires.ftc.teamcode.gytd.pathing.PedroAutomationAssist;
 import org.firstinspires.ftc.teamcode.gytd.pathing.PathingConfig;
 import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.LauncherSubsystem;
 /**
  * RED team Pedro assist TeleOp (linear-motion variant).
  *
- * Reuses the same {@link PedroShootAssist} controller as {@link RedTeamPedroTeleOp} - this is the
+ * Reuses the same {@link PedroAutomationAssist} controller as {@link RedTeamPedroTeleOp} - this is the
  * payoff of extracting the assist logic: both OpModes share identical, tested routing/state-machine
  * behavior and only differ in OpMode-level wiring (name/group/telemetry wording, if any).
  *
@@ -39,7 +39,7 @@ public class LinearNearAndFarPedroTeleOp extends LinearOpMode {
     private DriveSubsystem drive;
     private IntakeSubsystem intake;
     private LauncherSubsystem launcher;
-    private PedroShootAssist assist;
+    private PedroAutomationAssist assist;
 
     private boolean pendingShotRequest = false;
     private boolean lastShootButton = false;
@@ -71,7 +71,7 @@ public class LinearNearAndFarPedroTeleOp extends LinearOpMode {
         drive = robot.getDrive();
         intake = robot.getIntake();
         launcher = robot.getLauncher();
-        assist = PedroShootAssist.createRedAssist(hardwareMap);
+        assist = PedroAutomationAssist.createRedAssist(hardwareMap, drive);
 
         // See LauncherConstants Javadoc: without this, the launcher's target velocity stays at its
         // default of 0.0 and the "spin up" button would command 0 velocity (effectively off).

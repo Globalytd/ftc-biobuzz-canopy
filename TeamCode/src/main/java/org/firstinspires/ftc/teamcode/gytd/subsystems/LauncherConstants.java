@@ -24,6 +24,10 @@ public final class LauncherConstants {
     }
 
     // TODO: Replace with the real tuned value from Test: Launcher before competition use.
-    public static final double DEFAULT_TARGET_VELOCITY_RAD_PER_SEC = 330.0;
+    public static final double DEFAULT_TARGET_VELOCITY_RAD_PER_SEC = 305.0;
+
+    // Amount the target velocity changes per bumper press when live-tuning from the gamepad
+    // (see RedTeamPedroTeleOp: gamepad2 left bumper decreases, right bumper increases).
     public static final double VELOCITY_STEP_RAD_PER_SEC = 25.0;
 }
+

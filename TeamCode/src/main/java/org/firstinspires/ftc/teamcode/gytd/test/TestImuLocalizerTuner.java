@@ -47,6 +47,7 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
  * - Use the left bumper immediately to cancel if motion looks unsafe.
  * @author Daniel Musigire
  * @author Katriel Nakiberu
+ * Last reviewed: 2026-11-22
  */
 @TeleOp(name = "IMU Localizer Tuner", group = "Test")
 public class TestImuLocalizerTuner extends LinearOpMode {
@@ -97,7 +98,7 @@ public class TestImuLocalizerTuner extends LinearOpMode {
 
         robot = new Robot(hardwareMap);
         drive = robot.getDrive();
-        follower = createFollower();
+        follower = createFollower(drive);
         follower.setPose(new Pose(0.0, 0.0, 0.0));
 
         while (!isStarted() && !isStopRequested()) {
@@ -360,17 +361,17 @@ public class TestImuLocalizerTuner extends LinearOpMode {
         return radians;
     }
 
-    private Follower createFollower() {
+    private Follower createFollower(DriveSubsystem drive) {
         MecanumConfig drivetrainConfig = new MecanumConfig(c -> {
             c.frontLeftName.set(HardwareConstants.FRONT_LEFT_DRIVE);
             c.frontRightName.set(HardwareConstants.FRONT_RIGHT_DRIVE);
             c.backLeftName.set(HardwareConstants.BACK_LEFT_DRIVE);
             c.backRightName.set(HardwareConstants.BACK_RIGHT_DRIVE);
 
-            c.frontLeftDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.frontRightDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.backLeftDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.backRightDirection.set(DcMotorSimple.Direction.REVERSE);
+            c.frontLeftDirection.set(drive.getHardware().getFrontLeftDrive().getDirection());
+            c.frontRightDirection.set(drive.getHardware().getFrontRightDrive().getDirection());
+            c.backLeftDirection.set(drive.getHardware().getBackLeftDrive().getDirection());
+            c.backRightDirection.set(drive.getHardware().getBackRightDrive().getDirection());
 
             c.manualBrakeMode.set(true);
         });

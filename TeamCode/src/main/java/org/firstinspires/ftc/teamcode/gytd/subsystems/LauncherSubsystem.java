@@ -22,7 +22,7 @@ public class LauncherSubsystem {
         SPINNING_UP,
         READY,
         FIRING,
-        REVERSING
+        REVERSING_SPIN
     }
 
     // Tune these during testing.
@@ -50,11 +50,20 @@ public class LauncherSubsystem {
         targetVelocity = Math.max(0.0, radiansPerSecond);
 
         // If launcher is already running, apply new speed right away.
-        if (state == LauncherState.REVERSING) {
+        if (state == LauncherState.REVERSING_SPIN) {
             reverseLauncher();
         } else if (state != LauncherState.OFF) {
             applyVelocityTarget();
         }
+    }
+
+    /**
+     * Nudges the target velocity up or down by {@code deltaRadPerSec} (negative to decrease).
+     * Useful for live-tuning launcher speed from gamepad bumpers without restarting the OpMode.
+     * Clamped to never go below 0.
+     */
+    public void adjustTargetVelocity(double deltaRadPerSec) {
+        setTargetVelocity(targetVelocity + deltaRadPerSec);
     }
 
     public void setVelocityTolerance(double toleranceTicksPerSecond) {
@@ -79,7 +88,7 @@ public class LauncherSubsystem {
      * piece out of the gravity-fed chute without having to fully launch it.
      */
     public void reverseLauncher() {
-        state = LauncherState.REVERSING;
+        state = LauncherState.REVERSING_SPIN;
         if (launcherMotor != null) {
             double reverseVelocity = targetVelocity > 0.0
                     ? targetVelocity * REVERSE_VELOCITY_SCALE
@@ -105,7 +114,8 @@ public class LauncherSubsystem {
     }
 
     public void updateState() {
-        if (state == LauncherState.OFF || state == LauncherState.FIRING || state == LauncherState.REVERSING) {
+
+        if (state == LauncherState.OFF || state == LauncherState.FIRING || state == LauncherState.REVERSING_SPIN) {
             return;
         }
         state = atTargetVelocity() ? LauncherState.READY : LauncherState.SPINNING_UP;

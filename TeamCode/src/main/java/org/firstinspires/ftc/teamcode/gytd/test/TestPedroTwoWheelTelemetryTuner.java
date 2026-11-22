@@ -32,6 +32,7 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
  * - Keep the area around the robot clear while manually driving for tuning.
  * @author Daniel Musigire
  * @author Katriel Nakiberu
+ * Last reviewed: 2026-11-22
  */
 @TeleOp(name = "Test: Pedro TwoWheel Telemetry Tuner", group = "Test")
 public class TestPedroTwoWheelTelemetryTuner extends LinearOpMode {
@@ -66,7 +67,7 @@ public class TestPedroTwoWheelTelemetryTuner extends LinearOpMode {
 
         robot = new Robot(hardwareMap);
         drive = robot.getDrive();
-        follower = PedroFollowerFactory.createTwoWheelFollower(hardwareMap);
+        follower = PedroFollowerFactory.createTwoWheelFollower(hardwareMap, drive);
 
         follower.setPose(Pose.zero());
         referencePose = follower.pose();

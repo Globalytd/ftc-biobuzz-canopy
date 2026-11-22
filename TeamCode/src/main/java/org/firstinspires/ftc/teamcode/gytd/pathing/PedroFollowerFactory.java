@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.gytd.hardware.HardwareConstants;
+import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 
 /**
  * Creates Pedro follower instances using shared, centralized drivetrain/localizer/controller defaults.
@@ -40,17 +41,17 @@ public final class PedroFollowerFactory {
         // Utility class - no instantiation
     }
 
-    public static Follower createTwoWheelFollower(HardwareMap hardwareMap) {
+    public static Follower createTwoWheelFollower(HardwareMap hardwareMap, DriveSubsystem drive) {
         MecanumConfig drivetrainConfig = new MecanumConfig(c -> {
             c.frontLeftName.set(HardwareConstants.FRONT_LEFT_DRIVE);
             c.frontRightName.set(HardwareConstants.FRONT_RIGHT_DRIVE);
             c.backLeftName.set(HardwareConstants.BACK_LEFT_DRIVE);
             c.backRightName.set(HardwareConstants.BACK_RIGHT_DRIVE);
 
-            c.frontLeftDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.frontRightDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.backLeftDirection.set(DcMotorSimple.Direction.FORWARD);
-            c.backRightDirection.set(DcMotorSimple.Direction.REVERSE);
+            c.frontLeftDirection.set(drive.getHardware().getFrontLeftDrive().getDirection());
+            c.frontRightDirection.set(drive.getHardware().getFrontRightDrive().getDirection());
+            c.backLeftDirection.set(drive.getHardware().getBackLeftDrive().getDirection());
+            c.backRightDirection.set(drive.getHardware().getBackRightDrive().getDirection());
 
             c.manualBrakeMode.set(true);
         });

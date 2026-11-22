@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.util.ShootingSide;
 import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.util.TeleOpConstants;
+import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -33,7 +34,7 @@ import java.util.Map;
  * @author Daniel Musigire
  * @author Katriel Nakiberu
  */
-public class PedroShootAssist {
+public class PedroAutomationAssist {
 
     public enum State {
         IDLE,
@@ -51,6 +52,7 @@ public class PedroShootAssist {
     private ShootingSide activeSide;
     private Pose targetPose;
 
+    private DriveSubsystem drive;
     private final List<Path> activeSegments = new ArrayList<>();
     private final List<Pose> activeSegmentStarts = new ArrayList<>();
     private final List<Pose> activeSegmentEnds = new ArrayList<>();
@@ -61,24 +63,25 @@ public class PedroShootAssist {
     private boolean shootingAllowed = false;
     private double poseStableStartTimeS = -1.0;
 
-    public PedroShootAssist(HardwareMap hardwareMap, Pose homePose, Pose routeWaypointPose,
-                             Map<ShootingSide, Pose> targetPosesBySide) {
-        this.follower = PedroFollowerFactory.createTwoWheelFollower(hardwareMap);
+    public PedroAutomationAssist(HardwareMap hardwareMap, Pose homePose, Pose routeWaypointPose,
+                                 Map<ShootingSide, Pose> targetPosesBySide, DriveSubsystem drive) {
+        this.follower = PedroFollowerFactory.createTwoWheelFollower(hardwareMap, drive);
         this.homePose = homePose;
         this.routeWaypointPose = routeWaypointPose;
         this.targetPosesBySide = new EnumMap<>(targetPosesBySide);
         this.targetPose = homePose;
+        this.drive = drive;
 
         follower.setPose(homePose);
     }
 
     /** Convenience factory for the Red alliance Garden/Loading assist poses used today. */
-    public static PedroShootAssist createRedAssist(HardwareMap hardwareMap) {
+    public static PedroAutomationAssist createRedAssist(HardwareMap hardwareMap, DriveSubsystem drive) {
         Map<ShootingSide, Pose> targets = new EnumMap<>(ShootingSide.class);
         targets.put(ShootingSide.LOADING_SIDE, TeleOpConstants.RED_C5_LOADING_SHOOT_POSE);
         targets.put(ShootingSide.GARDEN_SIDE, TeleOpConstants.RED_C2_GARDEN_SHOOT_POSE);
-        return new PedroShootAssist(hardwareMap, TeleOpConstants.RED_HOME_POSE,
-                TeleOpConstants.RED_B3_ROUTE_WAYPOINT_POSE, targets);
+        return new PedroAutomationAssist(hardwareMap, TeleOpConstants.RED_HOME_POSE,
+                TeleOpConstants.RED_B3_ROUTE_WAYPOINT_POSE, targets, drive);
     }
 
     /** Call once per OpMode loop, regardless of assist state. */
