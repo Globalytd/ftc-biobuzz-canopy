@@ -37,6 +37,7 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
  * with the shared two-wheel localizer/drivetrain configuration used by other Pedro OpModes.
  * @author Daniel Musigire
  * @author Katriel Nakiberu
+ * Last reviewed: 2026-11-22
  */
 @TeleOp(name = "Test: Pedro Pathing Pilot", group = "Test")
 public class TestPedroPathingPilot extends LinearOpMode {
@@ -186,7 +187,7 @@ public class TestPedroPathingPilot extends LinearOpMode {
     }
 
     private Follower createFollower() {
-        return PedroFollowerFactory.createTwoWheelFollower(hardwareMap);
+        return PedroFollowerFactory.createTwoWheelFollower(hardwareMap, drive);
     }
 
     private void runPilotStateMachine() {

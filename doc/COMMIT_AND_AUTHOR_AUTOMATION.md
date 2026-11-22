@@ -89,3 +89,6 @@ You can keep this trailer in your commit message template with `-SetCoAuthorTemp
 - `.githooks/pre-commit` (Git hook entrypoint)
 - `.githooks/pre-commit.ps1` (author-tag insertion logic)
 - `.githooks/setup-hooks.ps1` (one-time repo setup)
+- `.githooks/touch-test-javadoc.ps1` (fixes a failed Test Javadoc check on staged files)
+Run:
+- `powershell -NoProfile -ExecutionPolicy Bypass -File ".\.githooks\touch-test-javadoc.ps1"`

@@ -58,5 +58,9 @@ public class DriveSubsystem {
     public String getBackendName() {
         return backend.getBackendName();
     }
+
+    public RobotHardware getHardware() {
+        return hardware;
+    }
 }
 

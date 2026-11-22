@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.util.LauncherSpeedControl;
 import org.firstinspires.ftc.teamcode.gytd.opmodes.teleop.util.ShootingSide;
-import org.firstinspires.ftc.teamcode.gytd.pathing.PedroShootAssist;
+import org.firstinspires.ftc.teamcode.gytd.pathing.PedroAutomationAssist;
 import org.firstinspires.ftc.teamcode.gytd.pathing.PathingConfig;
 import org.firstinspires.ftc.teamcode.gytd.robot.Robot;
 import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.LauncherSubsystem;
  * RED team Pedro assist TeleOp.
  *
  * All of the Pedro follower/route/state-machine logic now lives in the reusable
- * {@link PedroShootAssist} class. This OpMode only wires up gamepad buttons, drive, and the
+ * {@link PedroAutomationAssist} class. This OpMode only wires up gamepad buttons, drive, and the
  * launcher/intake mechanisms around it - making it easy to reuse the same assist behavior in other
  * field-centric TeleOps.
  *
@@ -43,13 +43,15 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
     private DriveSubsystem drive;
     private IntakeSubsystem intake;
     private LauncherSubsystem launcher;
-    private PedroShootAssist assist;
+    private PedroAutomationAssist assist;
     private final LauncherSpeedControl launcherSpeedControl = new LauncherSpeedControl();
 
     private boolean pendingShotRequest = false;
     private boolean lastShootButton = false;
     private boolean lastStopLauncherButton = false;
     private boolean lastStopAllButton = false;
+    private boolean lastDecreaseVelocityButton = false;
+    private boolean lastIncreaseVelocityButton = false;
 
     private boolean lastLoadingSideAssist = false;
     private boolean lastGardenSideAssist = false;
@@ -77,7 +79,7 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
         drive = robot.getDrive();
         intake = robot.getIntake();
         launcher = robot.getLauncher();
-        assist = PedroShootAssist.createRedAssist(hardwareMap);
+        assist = PedroAutomationAssist.createRedAssist(hardwareMap, robot.getDrive());
 
         // The launcher motor defaults to a target velocity of 0.0 until told otherwise - without
         // this, pressing the "spin up" button on gamepad2 would command 0 velocity (effectively
@@ -139,8 +141,8 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
     }
 
     private void updateAssistButtons() {
-        boolean loadingSideLaunchPressed = gamepad1.a && !lastLoadingSideAssist;
-        boolean gardenSideLaunchPressed = gamepad1.b && !lastGardenSideAssist;
+        boolean loadingSideLaunchPressed = gamepad1.left_trigger_pressed && !lastLoadingSideAssist;
+        boolean gardenSideLaunchPressed = gamepad1.right_trigger_pressed && !lastGardenSideAssist;
         boolean cancelPressed = gamepad1.x && !lastCancel;
         boolean resetHomePressed = gamepad1.y;
 
@@ -162,8 +164,8 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
             assist.resetToHomePose();
         }
 
-        lastLoadingSideAssist = gamepad1.a;
-        lastGardenSideAssist = gamepad1.b;
+        lastLoadingSideAssist = gamepad1.left_trigger_pressed;
+        lastGardenSideAssist = gamepad1.right_trigger_pressed;
         lastCancel = gamepad1.x;
     }
 
@@ -192,15 +194,25 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
         boolean shootPressed = gamepad2.a && !lastShootButton;
         boolean stopLauncherPressed = gamepad2.b && !lastStopLauncherButton;
         boolean stopAllPressed = gamepad2.x && !lastStopAllButton;
-// Push the right stick forward (away from the driver) to spin up the launcher.
-// Pull the right stick back (toward the driver) to reverse the launcher wheel, e.g. to
-// clear a jammed game piece out of the gravity-fed chute.
+        // Push the right stick forward (away from the driver) to spin up the launcher.
+        // Pull the right stick back (toward the driver) to reverse the launcher wheel, e.g. to
+        // clear a jammed game piece out of the gravity-fed chute.
         boolean spinUpRequested = -gamepad2.right_stick_y > GAMEPAD2_STICK_DEADZONE;
         boolean reverseRequested = -gamepad2.right_stick_y < -GAMEPAD2_STICK_DEADZONE;
+        // Bumpers live-tune the launcher's target velocity: left = slower, right = faster.
+        boolean decreaseVelocityPressed = gamepad2.left_bumper && !lastDecreaseVelocityButton;
+        boolean increaseVelocityPressed = gamepad2.right_bumper && !lastIncreaseVelocityButton;
 
         boolean pausedForPoseRecovery = assist.isPausedForPoseRecovery();
 
-// Keep the launcher available for manual use at any time.
+        if (decreaseVelocityPressed) {
+            launcher.adjustTargetVelocity(-LauncherConstants.VELOCITY_STEP_RAD_PER_SEC);
+        }
+        if (increaseVelocityPressed) {
+            launcher.adjustTargetVelocity(LauncherConstants.VELOCITY_STEP_RAD_PER_SEC);
+        }
+
+        // Keep the launcher available for manual use at any time.
         if (stopLauncherPressed || stopAllPressed) {
             stopLaunchingMechanisms();
         } else if (reverseRequested) {
@@ -229,6 +241,8 @@ public class RedTeamPedroTeleOp extends LinearOpMode {
         lastShootButton = gamepad2.a;
         lastStopLauncherButton = gamepad2.b;
         lastStopAllButton = gamepad2.x;
+        lastDecreaseVelocityButton = gamepad2.left_bumper;
+        lastIncreaseVelocityButton = gamepad2.right_bumper;
     }
 
     private void updateIntakeControls() {

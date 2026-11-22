@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * Central hardware container for the GYTD robot.
  * Holds references to all hardware devices and manages their lifecycle.
+ *
  * @author Daniel Musigire
  * @author Katriel Nakiberu
  */
@@ -61,7 +62,7 @@ public class RobotHardware {
 
         // Initialize intake motor
         launchMotor = hardwareMap.get(DcMotorEx.class, HardwareConstants.LAUNCH_MOTOR);
-       // launchMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        launchMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         imu = hardwareMap.get(IMU.class, HardwareConstants.IMU_NAME);

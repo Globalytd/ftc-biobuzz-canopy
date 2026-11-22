@@ -32,6 +32,7 @@ import org.firstinspires.ftc.teamcode.gytd.subsystems.DriveSubsystem;
  * - Use X immediately if motion is not expected or looks unsafe.
  * @author Daniel Musigire
  * @author Katriel Nakiberu
+ * Last reviewed: 2026-11-22
  */
 @TeleOp(name = "Test: Arena Mapper Pedro", group = "Test")
 public class TestArenaMapperPedro extends LinearOpMode {
@@ -297,7 +298,7 @@ public class TestArenaMapperPedro extends LinearOpMode {
     }
 
     private Follower createFollower() {
-        return PedroFollowerFactory.createTwoWheelFollower(hardwareMap);
+        return PedroFollowerFactory.createTwoWheelFollower(hardwareMap, drive);
     }
 }
 

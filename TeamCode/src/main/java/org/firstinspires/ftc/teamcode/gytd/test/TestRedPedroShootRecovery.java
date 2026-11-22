@@ -40,6 +40,7 @@ import java.util.List;
  * sync with the shared two-wheel localizer/drivetrain configuration used by other Pedro OpModes.
  * @author Daniel Musigire
  * @author Katriel Nakiberu
+ * Last reviewed: 2026-11-22
  */
 @TeleOp(name = "Test: Red Pedro Shoot Recovery", group = "Test")
 public class TestRedPedroShootRecovery extends LinearOpMode {
@@ -256,7 +257,7 @@ public class TestRedPedroShootRecovery extends LinearOpMode {
     }
 
     private Follower createFollower() {
-        return PedroFollowerFactory.createTwoWheelFollower(hardwareMap);
+        return PedroFollowerFactory.createTwoWheelFollower(hardwareMap, drive);
     }
 }
 
